@@ -4,9 +4,14 @@ from sqlalchemy import text
 
 from app.db.get_session import get_connection_db
 from app.config.logger import logger
+from app.routers import contacts
 
 app = FastAPI()
 
+app.include_router(
+    router = contacts.router, 
+    prefix = "/api"
+    )
 
 @app.get('/')
 def index():

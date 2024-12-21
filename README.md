@@ -8,6 +8,10 @@
 запуск сервера
 uvicorn app.main:app --reload
 
+cd project/root
+alembic init <name folder>
+alembic revision --autogenerate -m 'commit'
+alembic upgrade head
 
 
 

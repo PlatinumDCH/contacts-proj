@@ -3,12 +3,10 @@ import asyncio
 import json
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pathlib import Path
-from dotenv import load_dotenv
-load_dotenv()
 
 from app.config.configurate import settings
 from app.config.logger import  logger
-from app.db.get_rab_con import get_rabbit_connection
+from app.db.get_rab_con import get_rabbitmq_connection
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent / 'templates'
@@ -68,6 +66,8 @@ async def process_message(message:IncomingMessage):
                 logger.warning(f"Unknown message type: {message_type}")
                 return
             fm = FastMail(conf)
+            logger.info(f"Sending email to: {email}")
+            logger.info(f"Using template: {template_name}")
             await fm.send_message(message_schema, template_name=template_name)
             logger.info(f'Message precessed successfully : {email}. Type: {message_type}')
     except Exception as err:
@@ -81,23 +81,23 @@ async def main():
     retry_count = 0 # Счетчик попыток
     while retry_count < max_retires:
         try:
-            async for connection in get_rabbit_connection():
-
+            async with get_rabbitmq_connection() as connection:
+            
                 # Объявление обменника
                 async with connection:
                     channel = await connection.channel()
                     exchange = await channel.declare_exchange(
-                            name="sending_mail",
-                            type=ExchangeType.DIRECT,
-                            durable=True
-                        )
+                                name="sending_mail",
+                                type=ExchangeType.DIRECT,
+                                durable=True
+                            )
 
-                    # Объявляем очередь и связываем с routing_key
+                        # Объявляем очередь и связываем с routing_key
                     queue = await channel.declare_queue('email_queue', durable=True)
                     await queue.bind(exchange, routing_key="reset_password")
                     await queue.bind(exchange, routing_key="confirm_email")
 
-                    # Запускаем обработку сообщений
+                        # Запускаем обработку сообщений
                     await queue.consume(process_message)
                     logger.info("Worker is consuming messages...")
 
@@ -113,9 +113,10 @@ async def main():
                 await asyncio.sleep(5)
             else:
                 logger.critical('Max retry attempts reached.Exiting')
-    logger.info("Worker finished.")
+        finally:
+            logger.info("Worker finished.")
                 
 if __name__ == '__main__':
-    print('Воркер начал работат')
+    print('Воркер работат')
     asyncio.run(main())
   

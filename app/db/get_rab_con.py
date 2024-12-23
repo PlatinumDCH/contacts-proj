@@ -1,6 +1,7 @@
 from aio_pika import connect_robust, exceptions
 from aio_pika.abc import AbstractRobustConnection
 import asyncio
+from contextlib import asynccontextmanager
 
 from app.config.configurate import settings
 from app.config.logger import logger
@@ -22,15 +23,16 @@ class RaabbitMQConnectionManager:
         self.connection:AbstractRobustConnection|None = None
     
     async def connect(self)->AbstractRobustConnection:
-        """устанавливаем соединение с rabbotmq с повторными попытками
-
-        Returns:
-            AbstractRobustConnection: объект соединения
+        """возвращает активное соединение или создает новое
         """
+        if self.connection and not self.connection.is_closed:
+            logger.info('переиспользование подключения')
+            return self.connection
+        
         for attempt in range(self.retries):
             try:
                 self.connection = await connect_robust(self.url)
-                logger.info('rabbitmq conn TRUE')
+                logger.info('соединение сосздано')
                 return  self.connection
                 
             except exceptions.AMQPConnectionError as err:
@@ -40,24 +42,27 @@ class RaabbitMQConnectionManager:
                 await asyncio.sleep(self.delay)
         
     async def close(self):
-        """Закрываем соединение с rabbitmq"""
-        if self.connection:
+        """закрыть текущее соединение если оно сцществует"""
+        if self.connection and not self.connection.is_closed:
             await self.connection.close()
-            logger.info('rabbotmq connection closed')
+            logger.info('соединение закрыто')
     
     async def __aenter__(self)->AbstractRobustConnection:
         """контекстный менеджер для автоматического подключения"""
-        await self.connect()
-        return self.connection
+        logger.info('автоматическое подключение')
+        return await self.connection()
     
     async def __aexit__(self, exc_type, exc_value, traceback):
         """контекстный менеджер для автоматического закрытия соединения"""
+        logger.info('автоматическое отключение')
         await self.close()
 
-async def get_rabbit_connection():
-    url = settings.RABBITMQ_URL
-    retries = 5
-    delay = 1
-    async with RaabbitMQConnectionManager(url, retries, delay) as connection:
-        logger.info("Using RabbitMQ connection")
+@asynccontextmanager
+async def get_rabbitmq_connection():
+    manager = RaabbitMQConnectionManager(url=settings.RABBITMQ_URL)
+    connection = await manager.connect()
+    try:
         yield connection
+    finally:
+        await manager.close()
+

@@ -12,7 +12,7 @@ from app.config.logger import logger
 from app.services.base import service
 from app.config.configurate import settings
 
-router = APIRouter(prefix='/auth', tags=['users'])
+router = APIRouter(prefix='/auth', tags=['auth'])
 get_refresh_token = HTTPBearer()
 
 
@@ -74,7 +74,7 @@ async def signup(
         'email':new_user.email,
         'username':new_user.username,
         'host': str(request.base_url),
-        'queue_name':'confirm email',
+        'queue_name':'confirm_email',
         'token':email_token
     }
     await repo_users.update_token(
@@ -85,8 +85,7 @@ async def signup(
     )
     logger.info('обновить email_token в базе данных, успешно')
     await service.email.send_email(
-        email_task=email_task,
-        email_token=email_token
+        email_task=email_task
     )
     logger.info('отправить запрос к серверу, rabbit_mq, успешно')
     return {

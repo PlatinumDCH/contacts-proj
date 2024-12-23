@@ -2,15 +2,27 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.get_session import get_connection_db
 from app.config.logger import logger
-from app.routers import contacts, auth
+from app.routers import contacts, auth, users
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],  
+)
 app.mount('/static', StaticFiles(directory='app/templates/static'),name='static')
 
+app.include_router(
+    router=users.router,
+    prefix='/api'
+)
 app.include_router(
     router = contacts.router, 
     prefix = "/api"
@@ -46,4 +58,4 @@ async def healthchecker(db: AsyncSession = Depends(get_connection_db)):
             status_code=500, 
             detail="Error connecting to the database"
             )
-    
+

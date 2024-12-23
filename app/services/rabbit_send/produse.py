@@ -2,7 +2,7 @@ import aio_pika
 import json
 from aio_pika import ExchangeType
 
-from app.db.get_rab_con import get_rabbit_connection
+from app.db.get_rab_con import get_rabbitmq_connection
 from app.config import logger, settings
 
 async def send_to_rabbit(message: dict):
@@ -11,17 +11,17 @@ async def send_to_rabbit(message: dict):
     :parm message: Словарь с данными для публикации в RabbitMQ
     :parm message_type: Тип сообщения (password_reset, email_verification)
     '''
-    logger.info("Preparing to send message to RabbitMQ")
-    async for connection in get_rabbit_connection():
-        async with connection:
+    logger.info("Подготовка к отправке уведовления к RabbitMQ")
+    try:
+        async with get_rabbitmq_connection() as connection:
             channel = await connection.channel()
-
+            #обьявляем обменник
             exchange = await channel.declare_exchange(
                 name="sending_mail",
                 type=ExchangeType.DIRECT,
                 durable=True
             )
-            
+            #бубликуем сообщение
             await exchange.publish(
                 aio_pika.Message(
                     body=json.dumps(message).encode(),
@@ -29,5 +29,6 @@ async def send_to_rabbit(message: dict):
                 ),
                 routing_key=message['queue_name']
             )
-            logger.info(f"Message published to RabbitMQ with routing_key '{message['queue_name']}")
-            break 
+            logger.info(f"Сообщение отправлено в RabbitMQ с ключом '{message['queue_name']}'")
+    except Exception as err:
+        logger.err(f'Failed to publisher message: {err}')

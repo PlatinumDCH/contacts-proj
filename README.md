@@ -14,21 +14,18 @@ alembic revision --autogenerate -m 'commit'
 alembic upgrade head
 
 
-
+====================================
 ТУДУ:
-    указать папку статики для main фафла email_confirm
-    
 
-project/
-    __init__.py
-    src/
-        model.py
-    tests/
-        testmodel.py
 
- 
+====================================
 get http://127.0.0.1:8000/api/contacts/all 
 post http://127.0.0.1:8000/api/contacts 
 get http://127.0.0.1:8000/api/contacts/{contacts-id} 
 put http://127.0.0.1:8000/api/contacts/{contacts-id}
 delete http://127.0.0.1:8000/api/contacts/5
+
+
+
+запуск воркера
+PYTHONPATH=/Users/plarium/Develop/cources/Python_web python app/services/rabbit_send/worker.py

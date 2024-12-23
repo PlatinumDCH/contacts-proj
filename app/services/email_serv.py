@@ -37,12 +37,21 @@ class EmailService:
         return encoded_email_token
     
     
-    async def send_email(self, email_task:dict,email_token:str=None):
+    async def send_email(self, email_task:dict):
+        """
+        email_task = {
+            'email':new_user.email,
+            'username':new_user.username,
+            'host': str(request.base_url),
+            'queue_name':'confirm_email',
+            'token': < email_token >
+            }
+        """
         try:
-            logger.info(f'Sending email task to RabbitMQ: {email_task} ')
+            logger.info(f'Отравка словаря с информацией к RabbitMQ: {email_task} ')
             await send_to_rabbit(email_task)
         except Exception as err:
-            logger.error(f'Failed to send email task to RabbitMQ: {err}')
+            logger.error(f'Ошибка отпраки  email задачи к RabbitMQ: {err}')
             raise
 
 

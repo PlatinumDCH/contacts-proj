@@ -23,3 +23,15 @@ DETAIL:  Failing row contains (3, string, string, user@example.com, string, null
 [SQL: INSERT INTO contacts (first_name, last_name, email, phone_number, date_birthday, note, created_at, updated_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::DATE, $6::VARCHAR, now(), now()) RETURNING contacts.id, contacts.created_at, contacts.updated_at]
 [parameters: ('string', 'string', 'user@example.com', 'string', None, 'string')]
 (Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR - 2024-12-23 10:09:19,185  -get_session.py - Session rollback, exception: 1 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response',), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': None}
+
+ERROR - 2024-12-23 10:11:30,302  -get_session.py - Session rollback, exception: 1 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response',), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': None}
+
+ERROR - 2024-12-23 10:12:12,896  -get_session.py - Session rollback, exception: 1 validation errors:
+  {'type': 'model_attributes_type', 'loc': ('response',), 'msg': 'Input should be a valid dictionary or object to extract fields from', 'input': None}
+
+ERROR - 2024-12-23 10:15:24,704  -get_session.py - Session rollback, exception: 404: not found 
+ERROR - 2024-12-23 10:47:01,747  -get_session.py - Session rollback, exception: 'AsyncSession' object has no attribute 'referfh'
+ERROR - 2024-12-23 10:58:32,811  -get_session.py - Session rollback, exception: module 'app.repository.contacts' has no attribute 'delete_contact'

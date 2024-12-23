@@ -25,3 +25,9 @@ project/
     tests/
         testmodel.py
 
+ 
+get http://127.0.0.1:8000/api/contacts/all 
+post http://127.0.0.1:8000/api/contacts 
+get http://127.0.0.1:8000/api/contacts/{contacts-id} 
+put http://127.0.0.1:8000/api/contacts/{contacts-id}
+delete http://127.0.0.1:8000/api/contacts/5

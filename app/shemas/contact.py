@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
 
 """
@@ -14,4 +14,6 @@ class CreateContact(BaseModel):
     note: Optional[str]
     phone_number:str
     
-    
+class ContactResponse(CreateContact):
+    id:int
+    model_config = ConfigDict(from_attribute=True)

@@ -40,3 +40,35 @@ async def create_contact(body:CreateContact,db:AsyncSession)->Contacts:
     await db.refresh(contact)
     return contact
 
+"""
+получить контакт по id(id_contact:int, connecting database)
+    запрос
+    подожди выполнить запрос 
+    вернуть первый контакт 
+"""
+
+async def get_contact_by_id(contact_id:int, db)->Contacts|None:
+    query = select(Contacts).where(Contacts.id==contact_id)
+    contact = await db.execute(query)
+    return contact.scalar_one_or_none()
+
+"""
+update_contact(body, contact-obj, session):
+    обновить объект контакта
+    законмитить
+    рефрешнуть
+    вернуть обьект контакта
+"""
+
+async def update_contact(body, contact:Contacts, db:AsyncSession)->Contacts:
+    for key, value in body.model_dump(exclude_unset=True).items():
+        setattr(contact, key, value) 
+    await db.commit()
+    await db.refresh(contact)
+    return contact
+
+async def delete_contact(contact:Contacts, db:AsyncSession):
+    await db.delete(contact)
+    await db.commit()
+
+    

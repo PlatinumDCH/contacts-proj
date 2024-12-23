@@ -16,7 +16,8 @@ alembic upgrade head
 
 
 ТУДУ:
-
+    указать папку статики для main фафла email_confirm
+    
 
 project/
     __init__.py

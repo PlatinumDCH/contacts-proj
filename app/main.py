@@ -1,21 +1,24 @@
-from dotenv import load_dotenv
-import os 
-load_dotenv()
-
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
+from fastapi.staticfiles import StaticFiles
 
 from app.db.get_session import get_connection_db
 from app.config.logger import logger
-from app.routers import contacts
+from app.routers import contacts, auth
+
 
 app = FastAPI()
+app.mount('/static', StaticFiles(directory='app/templates/static'),name='static')
 
 app.include_router(
     router = contacts.router, 
     prefix = "/api"
     )
+app.include_router(
+    router=auth.router,
+    prefix='/api'
+)
 
 @app.get('/')
 def index():

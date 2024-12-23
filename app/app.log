@@ -35,3 +35,18 @@ ERROR - 2024-12-23 10:12:12,896  -get_session.py - Session rollback, exception: 
 ERROR - 2024-12-23 10:15:24,704  -get_session.py - Session rollback, exception: 404: not found 
 ERROR - 2024-12-23 10:47:01,747  -get_session.py - Session rollback, exception: 'AsyncSession' object has no attribute 'referfh'
 ERROR - 2024-12-23 10:58:32,811  -get_session.py - Session rollback, exception: module 'app.repository.contacts' has no attribute 'delete_contact'
+ERROR - 2024-12-23 13:35:48,946  -get_session.py - Session rollback, exception: bcrypt: no backends available -- recommend you install one (e.g. 'pip install bcrypt')
+INFO - 2024-12-23 13:36:57,911  -email_serv.py - token type email_token
+INFO - 2024-12-23 13:36:57,924  -email_serv.py - Sending email task to RabbitMQ: {'email': 'user@example.com', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'confirm email', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNzM0OTk3MDE3LCJpYXQiOjE3MzQ5NTM4MTcsInNjb3BlIjoiZW1haWxfdG9rZW4ifQ.g3ZQX4XpifdICOeU_Jln1q_o8HKvD5b0z_i35cBf-Fk'} 
+INFO - 2024-12-23 13:36:57,924  -produse.py - Preparing to send message to RabbitMQ
+INFO - 2024-12-23 13:36:57,952  -get_rab_con.py - rabbitmq conn TRUE
+INFO - 2024-12-23 13:36:57,952  -get_rab_con.py - Using RabbitMQ connection
+INFO - 2024-12-23 13:36:57,960  -produse.py - Message published to RabbitMQ with routing_key 'confirm email
+INFO - 2024-12-23 13:36:57,962  -get_rab_con.py - rabbotmq connection closed
+WARNING - 2024-12-23 13:37:03,731  -auth.py - user already exists in database
+ERROR - 2024-12-23 13:37:03,731  -get_session.py - Session rollback, exception: 409: account already exists
+INFO - 2024-12-23 16:05:40,073  -worker.py - Starting worker...
+INFO - 2024-12-23 16:05:40,084  -get_rab_con.py - rabbitmq conn TRUE
+INFO - 2024-12-23 16:05:40,084  -get_rab_con.py - Using RabbitMQ connection
+INFO - 2024-12-23 16:05:40,095  -worker.py - Worker is consuming messages...
+INFO - 2024-12-23 16:06:08,711  -get_rab_con.py - rabbotmq connection closed

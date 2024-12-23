@@ -17,15 +17,15 @@ class Contacts(BaseModel):
     last_name: Mapped[str] = mapped_column(String(50))
     email: Mapped[str] = mapped_column(String(25))
     phone_number: Mapped[str] = mapped_column(String)
-    date_birthday: Mapped[Date] = mapped_column(Date)
+    # date_birthday: Mapped[Date] = mapped_column(Date)
     note: Mapped[str] = mapped_column(String, default=None)
     created_at: Mapped[date] = mapped_column(
         "created_at", DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column(
         "updated_at", DateTime, default=func.now(), onupdate=func.now(), nullable=True)
-    users_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id"), nullable=True)
-    user: Mapped["Users"] = relationship("Users", backref="todos", lazy="joined")
+    # users_id: Mapped[int] = mapped_column(
+    #     Integer, ForeignKey("users.id"), nullable=True)
+    # user: Mapped["Users"] = relationship("Users", backref="todos", lazy="joined")
 
 
 class UserTokensTable(BaseModel):

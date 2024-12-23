@@ -1,0 +1,25 @@
+CRITICAL - 2024-12-22 22:14:38,440  -main.py - Database connection error, the greenlet library is required to use this function. No module named 'greenlet'
+ERROR - 2024-12-22 22:14:38,441  -get_session.py - Session rollback, exception: 500: Error connecting to the database
+CRITICAL - 2024-12-22 22:15:01,759  -main.py - Database connection error, the greenlet library is required to use this function. No module named 'greenlet'
+ERROR - 2024-12-22 22:15:01,759  -get_session.py - Session rollback, exception: 500: Error connecting to the database
+CRITICAL - 2024-12-22 22:15:08,730  -main.py - Database connection error, the greenlet library is required to use this function. No module named 'greenlet'
+ERROR - 2024-12-22 22:15:08,730  -get_session.py - Session rollback, exception: 500: Error connecting to the database
+ERROR - 2024-12-22 22:15:49,294  -get_session.py - Session rollback, exception: 'str' object has no attribute 'as_tuple'
+ERROR - 2024-12-22 22:18:17,612  -get_session.py - Session rollback, exception: 'firtst_name' is an invalid keyword argument for Contacts
+ERROR - 2024-12-22 22:19:24,457  -get_session.py - Session rollback, exception: Instance '<Contacts at 0x105f26990>' is not persistent within this Session
+ERROR - 2024-12-22 22:19:50,382  -get_session.py - Session rollback, exception: Instance '<Contacts at 0x104ffe750>' is not persistent within this Session
+ERROR - 2024-12-22 22:24:01,116  -get_session.py - Session rollback, exception: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column "date_birthday" violates not-null constraint
+DETAIL:  Failing row contains (1, string, string, user@example.com, string, null, string, 2024-12-22 20:24:01.112307, 2024-12-22 20:24:01.112307, null).
+[SQL: INSERT INTO contacts (first_name, last_name, email, phone_number, date_birthday, note, created_at, updated_at, users_id) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::DATE, $6::VARCHAR, now(), now(), $7::INTEGER) RETURNING contacts.id, contacts.created_at, contacts.updated_at]
+[parameters: ('string', 'string', 'user@example.com', 'string', None, 'string', None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR - 2024-12-22 22:26:21,829  -get_session.py - Session rollback, exception: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column "date_birthday" violates not-null constraint
+DETAIL:  Failing row contains (2, string, string, user@example.com, string, null, string, 2024-12-22 20:26:21.8272, 2024-12-22 20:26:21.8272, null).
+[SQL: INSERT INTO contacts (first_name, last_name, email, phone_number, date_birthday, note, created_at, updated_at, users_id) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::DATE, $6::VARCHAR, now(), now(), $7::INTEGER) RETURNING contacts.id, contacts.created_at, contacts.updated_at]
+[parameters: ('string', 'string', 'user@example.com', 'string', None, 'string', None)]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)
+ERROR - 2024-12-22 22:30:13,834  -get_session.py - Session rollback, exception: (sqlalchemy.dialects.postgresql.asyncpg.IntegrityError) <class 'asyncpg.exceptions.NotNullViolationError'>: null value in column "date_birthday" violates not-null constraint
+DETAIL:  Failing row contains (3, string, string, user@example.com, string, null, string, 2024-12-22 20:30:13.829713, 2024-12-22 20:30:13.829713).
+[SQL: INSERT INTO contacts (first_name, last_name, email, phone_number, date_birthday, note, created_at, updated_at) VALUES ($1::VARCHAR, $2::VARCHAR, $3::VARCHAR, $4::VARCHAR, $5::DATE, $6::VARCHAR, now(), now()) RETURNING contacts.id, contacts.created_at, contacts.updated_at]
+[parameters: ('string', 'string', 'user@example.com', 'string', None, 'string')]
+(Background on this error at: https://sqlalche.me/e/20/gkpj)

@@ -9,9 +9,19 @@ readme = "README.md"
 python = "^3.11"
 fastapi = "^0.115.6"
 uvicorn = "^0.34.0"
+sqlalchemy = "^2.0.36"
+pydantic-settings = "^2.7.0"
+pydantic = {extras = ["email"], version = "^2.10.4"}
+asyncpg = "^0.30.0"
+python-dotenv = "^1.0.1"
+greenlet = "^3.1.1"
 alembic = "^1.14.0"
 
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+packeges = [
+    { include = 'app' }
+]

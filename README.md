@@ -17,3 +17,11 @@ alembic upgrade head
 
 ТУДУ:
 
+
+project/
+    __init__.py
+    src/
+        model.py
+    tests/
+        testmodel.py
+

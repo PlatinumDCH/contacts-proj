@@ -23,9 +23,9 @@ class Contacts(BaseModel):
         "created_at", DateTime, default=func.now(), nullable=True)
     updated_at: Mapped[date] = mapped_column(
         "updated_at", DateTime, default=func.now(), onupdate=func.now(), nullable=True)
-    # users_id: Mapped[int] = mapped_column(
-    #     Integer, ForeignKey("users.id"), nullable=True)
-    # user: Mapped["Users"] = relationship("Users", backref="todos", lazy="joined")
+    users_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("users.id"), nullable=True)
+    user: Mapped["Users"] = relationship("Users", backref="todos", lazy="joined")
 
 
 class UserTokensTable(BaseModel):

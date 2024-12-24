@@ -64,7 +64,7 @@ async def signup(
         )
     body.password = service.password.get_password_hash(body.password)
     new_user = await repo_users.create_user(body, db)
-    
+
     await service.email.pocess_email_confirmation(
         new_user,
         request,
@@ -144,7 +144,7 @@ async def login(
         data={'sub':user.email}
     )
     logger.info('создал refresh токен')
-    await repo_users.update_token(user, encoded_refresh_token, settings.refresh_token)
+    await repo_users.update_token(user, encoded_refresh_token, settings.refresh_token, db)
     logger.info('обновил refresh токен в базе данных')
     return {
         'access_token':encoded_assess_token,

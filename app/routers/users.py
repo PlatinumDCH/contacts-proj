@@ -8,7 +8,9 @@ from app.services.base import service
 from app.config.logger import logger
 from app.repository import users as repo_users
 from app.services.base import service
-from app.shemas.user import ReauestEmail
+from fastapi_limiter.depends import RateLimiter
+from app.models.base_model import Users
+from app.shemas.user import ReauestEmail, UserResponse
 
 router = APIRouter(prefix='/users', tags=['users'])
 
@@ -34,6 +36,25 @@ async def confirmed_email(
     await repo_users.update_token(user, None, settings.email_token, db)
     return {'message': 'Email confirmed'}
 
+@router.get('/me', response_model=UserResponse, 
+            dependencies=[Depends(RateLimiter(times=1, seconds=20))])
+async def get_current_user(user:Users=Depends(service.auth.get_current_user)):
+    """
+    postman
+    get http://127.0.0.1:8000/api/users/me
+    autorization : type bearer token
+    вставить токен access
+    ограничение запросов 1 на 20с.
+    """
+    try:
+        logger.info('возврат собтвенного ендпоинта')
+        return user
+    except Exception as err:
+        logger.error('Ошибка при проучения текущего пользователя',err)
+        raise HTTPException(
+            status_code = status.HTTP_429_TOO_MANY_REQUESTS,
+            detail='To mane request'
+        )
 
 @router.get('/{username}')
 async def request_email(username: str, response: Response, 
@@ -44,7 +65,7 @@ async def request_email(username: str, response: Response,
     logger.info(f'{username} open verifivation email')
     return FileResponse("app/templates/static/open_check.png", media_type="image/png", content_disposition_type="inline")
 
-@router.post('/reauest_email')
+@router.post('/request_email')
 async def request_email(body:ReauestEmail,request:Request,
                         db:AsyncSession=Depends(get_connection_db)):
     """повторная отправка email для подтверждения"""
@@ -55,5 +76,5 @@ async def request_email(body:ReauestEmail,request:Request,
         }
     await service.email.pocess_email_confirmation(user,request,db)
     return {
-        {'message':'Email send, checck you post for confirmation'}
+        'message':'Email send, checck you post for confirmation'
     }

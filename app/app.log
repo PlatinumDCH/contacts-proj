@@ -1,16 +1,54 @@
-INFO - 2024-12-23 19:04:51,021  -email_serv.py - token type email_token
-INFO - 2024-12-23 19:04:51,022  -auth.py - создать email_token, успешно
-INFO - 2024-12-23 19:04:51,036  -auth.py - обновить email_token в базе данных, успешно
-INFO - 2024-12-23 19:04:51,036  -email_serv.py - Отравка словаря с информацией к RabbitMQ: {'email': 'dimacheban23@meta.ua', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'confirm_email', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaW1hY2hlYmFuMjNAbWV0YS51YSIsImV4cCI6MTczNTAxNjY5MSwiaWF0IjoxNzM0OTczNDkxLCJzY29wZSI6ImVtYWlsX3Rva2VuIn0.a4CRTKj2gBHgNU8sDranDjTd7Fy19a_3QtvOGM_V1qY'} 
-INFO - 2024-12-23 19:04:51,036  -produse.py - Подготовка к отправке уведовления к RabbitMQ
-INFO - 2024-12-23 19:04:51,046  -get_rab_con.py - соединение сосздано
-INFO - 2024-12-23 19:04:51,053  -produse.py - Сообщение отправлено в RabbitMQ с ключом 'confirm_email'
-INFO - 2024-12-23 19:04:51,055  -worker.py - Message data parsed: {'email': 'dimacheban23@meta.ua', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'confirm_email', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaW1hY2hlYmFuMjNAbWV0YS51YSIsImV4cCI6MTczNTAxNjY5MSwiaWF0IjoxNzM0OTczNDkxLCJzY29wZSI6ImVtYWlsX3Rva2VuIn0.a4CRTKj2gBHgNU8sDranDjTd7Fy19a_3QtvOGM_V1qY'}
-INFO - 2024-12-23 19:04:51,055  -worker.py - Processing confirm email message
-INFO - 2024-12-23 19:04:51,055  -get_rab_con.py - соединение закрыто
-INFO - 2024-12-23 19:04:51,055  -auth.py - отправить запрос к серверу, rabbit_mq, успешно
-INFO - 2024-12-23 19:04:51,056  -worker.py - Sending email to: dimacheban23@meta.ua
-INFO - 2024-12-23 19:04:51,057  -worker.py - Using template: email/email_confirm.html
-INFO - 2024-12-23 19:04:53,240  -worker.py - Message precessed successfully : dimacheban23@meta.ua. Type: confirm_email
-INFO - 2024-12-23 19:05:22,877  -users.py - string open verifivation email
-INFO - 2024-12-23 19:15:26,622  -worker.py - Worker finished.
+INFO - 2024-12-24 10:39:14,518  -email_serv.py - token type email_token
+INFO - 2024-12-24 10:39:14,518  -email_serv.py - Cоздать email_toke, успешно
+INFO - 2024-12-24 10:39:14,531  -email_serv.py - обновить email токен в базе данных, успешно
+INFO - 2024-12-24 10:39:14,531  -email_serv.py - Отравка словаря с информацией к RabbitMQ: {'email': 'dimacheban23@meta.ua', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'confirm_email', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaW1hY2hlYmFuMjNAbWV0YS51YSIsImV4cCI6MTczNTA3Mjc1NCwiaWF0IjoxNzM1MDI5NTU0LCJzY29wZSI6ImVtYWlsX3Rva2VuIn0.YW8FbdU1tVDHWZnUSWIyIr3CClUPzMPM8vfAvsO6TGM'} 
+INFO - 2024-12-24 10:39:14,531  -produse.py - Подготовка к отправке уведовления к RabbitMQ
+INFO - 2024-12-24 10:39:14,536  -get_rab_con.py - соединение сосздано
+INFO - 2024-12-24 10:39:14,540  -produse.py - Сообщение отправлено в RabbitMQ с ключом 'confirm_email'
+INFO - 2024-12-24 10:39:14,542  -get_rab_con.py - соединение закрыто
+INFO - 2024-12-24 10:39:14,542  -email_serv.py - отравить запрос к серверу rabbitmq успешно
+INFO - 2024-12-24 10:39:14,545  -worker.py - Message data parsed: {'email': 'dimacheban23@meta.ua', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'confirm_email', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaW1hY2hlYmFuMjNAbWV0YS51YSIsImV4cCI6MTczNTA3Mjc1NCwiaWF0IjoxNzM1MDI5NTU0LCJzY29wZSI6ImVtYWlsX3Rva2VuIn0.YW8FbdU1tVDHWZnUSWIyIr3CClUPzMPM8vfAvsO6TGM'}
+INFO - 2024-12-24 10:39:14,545  -worker.py - Processing confirm email message
+INFO - 2024-12-24 10:39:14,547  -worker.py - Sending email to: dimacheban23@meta.ua
+INFO - 2024-12-24 10:39:14,547  -worker.py - Using template: email/email_confirm.html
+INFO - 2024-12-24 10:39:16,475  -worker.py - Message precessed successfully : dimacheban23@meta.ua. Type: confirm_email
+INFO - 2024-12-24 10:39:28,090  -users.py - string open verifivation email
+INFO - 2024-12-24 11:26:06,947  -worker.py - Worker finished.
+INFO - 2024-12-24 11:31:59,347  -auth.py - Не нашел email в дазе данных
+ERROR - 2024-12-24 11:31:59,347  -get_session.py - Session rollback, exception: 401: envalid email
+INFO - 2024-12-24 11:32:13,904  -auth.py - Не нашел email в дазе данных
+ERROR - 2024-12-24 11:32:13,904  -get_session.py - Session rollback, exception: 401: envalid email
+INFO - 2024-12-24 11:32:43,799  -users.py - me open verifivation email
+INFO - 2024-12-24 11:32:55,795  -auth.py - Не нашел email в дазе данных
+ERROR - 2024-12-24 11:32:55,795  -get_session.py - Session rollback, exception: 401: envalid email
+INFO - 2024-12-24 11:33:18,284  -email_serv.py - token type email_token
+INFO - 2024-12-24 11:33:18,284  -email_serv.py - Cоздать email_toke, успешно
+INFO - 2024-12-24 11:33:18,296  -email_serv.py - обновить email токен в базе данных, успешно
+INFO - 2024-12-24 11:33:18,296  -email_serv.py - Отравка словаря с информацией к RabbitMQ: {'email': 'user@example.com', 'username': 'dima', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'confirm_email', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNzM1MDc1OTk4LCJpYXQiOjE3MzUwMzI3OTgsInNjb3BlIjoiZW1haWxfdG9rZW4ifQ.0p5Db0zpDrwXi_ptyA_lgHpA0Jtni5TDhqlnbaLK-Mc'} 
+INFO - 2024-12-24 11:33:18,296  -produse.py - Подготовка к отправке уведовления к RabbitMQ
+INFO - 2024-12-24 11:33:18,303  -get_rab_con.py - соединение сосздано
+INFO - 2024-12-24 11:33:18,310  -produse.py - Сообщение отправлено в RabbitMQ с ключом 'confirm_email'
+INFO - 2024-12-24 11:33:18,311  -get_rab_con.py - соединение закрыто
+INFO - 2024-12-24 11:33:18,311  -email_serv.py - отравить запрос к серверу rabbitmq успешно
+INFO - 2024-12-24 11:33:30,010  -auth.py - Не нашел email в дазе данных
+ERROR - 2024-12-24 11:33:30,010  -get_session.py - Session rollback, exception: 401: envalid email
+INFO - 2024-12-24 11:34:06,787  -auth.py - Не нашел email в дазе данных
+ERROR - 2024-12-24 11:34:06,788  -get_session.py - Session rollback, exception: 401: envalid email
+INFO - 2024-12-24 11:37:55,572  -auth.py - Не нашел email в дазе данных
+ERROR - 2024-12-24 11:37:55,572  -get_session.py - Session rollback, exception: 401: envalid email
+INFO - 2024-12-24 11:38:23,119  -auth.py - емеил не подтвержден в базе данных
+ERROR - 2024-12-24 11:38:23,119  -get_session.py - Session rollback, exception: 401: Account not confirmed, check email
+INFO - 2024-12-24 11:38:37,254  -auth.py - создал токен assess
+INFO - 2024-12-24 11:38:37,254  -auth.py - создал refresh токен
+ERROR - 2024-12-24 11:38:37,254  -get_session.py - Session rollback, exception: update_token() missing 1 required positional argument: 'db'
+INFO - 2024-12-24 11:39:05,572  -auth.py - создал токен assess
+INFO - 2024-12-24 11:39:05,572  -auth.py - создал refresh токен
+INFO - 2024-12-24 11:39:05,587  -auth.py - обновил refresh токен в базе данных
+INFO - 2024-12-24 11:42:47,488  -users.py - me open verifivation email
+INFO - 2024-12-24 11:42:50,875  -users.py - me open verifivation email
+INFO - 2024-12-24 11:42:54,161  -users.py - me open verifivation email
+INFO - 2024-12-24 11:47:25,975  -users.py - me open verifivation email
+INFO - 2024-12-24 11:47:28,839  -users.py - me open verifivation email
+INFO - 2024-12-24 11:49:17,099  -users.py - me open verifivation email
+INFO - 2024-12-24 12:16:58,215  -auth_serv.py - User user@example.com from database
+INFO - 2024-12-24 12:16:58,243  -users.py - возврат собтвенного ендпоинта

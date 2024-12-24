@@ -2,21 +2,19 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from fastapi.staticfiles import StaticFiles
+from fastapi_limiter import FastAPILimiter
+from fastapi_limiter.depends import RateLimiter
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.db.get_session import get_connection_db
 from app.config.logger import logger
 from app.routers import contacts, auth, users
+from app.config.configurate import settings, configure_cors, lifespan
 
 
-app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],  
-    allow_headers=["*"],  
-)
+app = FastAPI(lifespan=lifespan)
+configure_cors(app)
+
 app.mount('/static', StaticFiles(directory='app/templates/static'),name='static')
 
 app.include_router(

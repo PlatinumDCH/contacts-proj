@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from jose import JWTError
@@ -6,6 +6,8 @@ import pickle
 import redis
 
 from app.repository import users as repository_users
+from app.models.base_model import Users
+from app.config.pack_roles import Role
 from app.services.jwt_serv import JWTService
 from app.db.get_session import get_connection_db
 from app.config import settings, logger
@@ -25,8 +27,9 @@ class AuthService:
             headers={'WWW-Authenticate': 'Bearer'}
         )
         try:
-            
+            logger.info('начало получение токена')
             email = await JWTService().decode_token(token, settings.access_token)
+            logger.info(f'получил вот такой емеил {email}')
             if email is None:
                 raise credentials_exception
         except JWTError as err:
@@ -39,6 +42,7 @@ class AuthService:
             user = await repository_users.get_user_by_email(email, db)
             if user is None:
                 raise credentials_exception
+            logger.info(f"Checking cache for user {user_hesh}")
             self.cashe.set(user_hesh, pickle.dumps(user))
             self.cashe.expire(user_hesh, 500)
         else:
@@ -46,3 +50,21 @@ class AuthService:
             user = pickle.loads(user)
             
         return user
+
+
+
+class RoleAccess(AuthService):
+    def __init__(self, allowed_roles:list[Role]):
+        self.allowed_roles = allowed_roles
+    
+    async def __call__(
+            self, 
+            request:Request,
+            user:Users = Depends(lambda:AuthService().get_current_user())):
+            # Проверяем, есть ли у пользователя подходящая роль
+            user = await user
+            logger.info(user.role, self.allowed_roles)
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail='Forbidden'
+            )

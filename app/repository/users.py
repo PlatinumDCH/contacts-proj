@@ -9,10 +9,21 @@ from app.shemas.token import TokenUpdateRequest
 from libgravatar import Gravatar
 from app.config.logger import logger
 
-async def get_user_by_email(
-        email:str,
-        db: AsyncSession = Depends(get_connection_db)
-)->Users|None:
+async def get_user_by_email(email:str,db: AsyncSession = 
+    Depends(get_connection_db))->Users|None:    
+    """
+    Получить пользователя пол его адресу електронной почты из дазы данных.
+
+        Args:
+            email (str): Адрес електронной посчты пользователя, которого
+                нужно получить.
+            db (AsyncSession, optional): Зависимось сессии базы данных.
+                по уиолчанию используется асинхронная сесия из get_connection_db
+
+        Returns:
+            Users | None: The user object if found, otherwise None.
+    """
+    
     query = select(Users).filter_by(email=email)
     user = await db.execute(query)
     user = user.scalar_one_or_none()
@@ -20,8 +31,21 @@ async def get_user_by_email(
 
 async def create_user(
         body: NewUserSchema, 
-        db: AsyncSession = Depends(get_user_by_email)
-)->Users:
+        db: AsyncSession = Depends(get_user_by_email))->Users:
+    """
+    создать пользователя в базе данных.
+
+    Args:
+        body (NewUserSchema): схема содержащая данные нового пользователя.
+        db (AsyncSession, optional): ависимось сессии базы данных.
+                по уиолчанию используется асинхронная сесия из get_connection_db
+
+    Returns:
+        Users: обьект только что созданного пользователя.
+
+    Raises:
+        Exception: Возникает ошибка при получении аватара пользователя.
+    """
     avatar = None
     try:
         g = Gravatar(body.email)
@@ -41,28 +65,28 @@ async def update_token(
         user: Users,
         token: TokenUpdateRequest,
         token_type:str,
-        db: AsyncSession
-)->None:
+        db: AsyncSession)->None:
     """
-    Update or add a token for a user in the databese
+    обновить токен пользователя в базе данных
 
     Args:
-        user (UsetsTable): The user obj with the user's id.
-        token (str): The new token value to store.
-        token_type (str): The type of token (e.g., "refresh_token").
-        db (AsyncSession): The database session for executing queries.
+        user (UsetsTable): обьнкт пользователя и идентификатором пользователя.
+        token (str): новое значение токена для сохранения.
+        token_type (str): тип токена (e.g., "refresh_token").
+        db (AsyncSession): сассия базы данных для выполнения запросов.
 
-    What the function does:
-        1. Finds the user's tokens in the database.
+    что делает функция:
+        1. находит токены пользователя в базе данных.
             user_tokens = UserTokensTable(
                     user_id=1,
                     refresh_token="old_token",
                     email_token="email_token"
                     )
-        2. If user_tokens not None, reload tokens value
-        3. If user_tokens is None, create new UserTokensTable object with user_id and token value
-        4. Saves the changes to the database.
-        5. Handles errors by rolling back the transaction.
+        2. если user_tokens не None, обновляем значение токена
+        3. если  user_tokens is None, создает новый обьект UserTokensTable 
+        с user_id и значение токена
+        4. созраняет изменения в базе данных.
+        5. обрабатывает ошибки, открываея транкзацию.
 
     Returns:
         None
@@ -95,15 +119,15 @@ async def update_token(
 
 async def get_token(user: Users, token_type: str, db: AsyncSession) -> str | None:
     """
-    Get the token value for a user with the database
+    получить значение токена для использования из базы данных
 
     Args:
-        user (UsersTable): object user from database
-        token_type (str): the type of token
-        db (AsyncSession): async session for executing queries
+        user (UsersTable): обьект пользователя из базы данных
+        token_type (str): тип токена
+        db (AsyncSession): ассинхронная сессия для выполнения запроса
 
     Returns:
-        str|None: encoded token:str  or  None
+        str|None: закодированый токен в виде строки или None
     """
     try:
         user_query = select(UserTokensTable).filter_by(user_id=user.id)
@@ -119,14 +143,35 @@ async def get_token(user: Users, token_type: str, db: AsyncSession) -> str | Non
         raise err
     
 async def confirmed_email(email: str, db: AsyncSession) -> None:
-    """change confirmed status of user to True"""
+    """
+    обновить стату подтверждения пользователя на True на основе его 
+    електронной почты.
+
+    Args:
+        email (str): адрес посты пользователя стату подтверждения которого нужно 
+        обновить.
+        db (AsyncSession): сессия базы данных, используемая для операции.
+
+    Returns:
+        None
+    """
     user = await get_user_by_email(email, db)
     user.confirmed = True
     await db.commit()
     await db.refresh(user)
 
 async def update_user_password(user: Users, password: str, db: AsyncSession):
-    """change user password"""
+    """
+    обновить пароь для указанного пользователя.
+
+    Args:
+        user (Users): обькт пользователя чей пароль нужно обновить.
+        password (str): новый пароль для установки пользрвателю.
+        db (AsyncSession): сессия базы данных используемая для операции.
+
+    Returns:
+        Users: обновленный обьект пользователя с новым паролем.
+    """
     user = await get_user_by_email(email=user.email, db=db)
     user.password = password
     await db.commit()

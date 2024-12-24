@@ -11,40 +11,6 @@ from app.shemas.contact import CreateContact, ContactResponse
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
-"""
-get_all_contacts  get http://127.0.0.1:8000/contacts/all 
-    сделать запрос к бд, получить контакты
-        limit 10, ge10, le500 = контакты будут выдаватся по 10 штук,можно
-        выставить от 10 до 500
-        offset, c каким смещение выдать.Пример
-        пускаеть есть 30 заметок, offset 10, выдаст от 10 - 30
-        le - less or equal
-        ge - greare or equal
-
-
-create_contact post http://127.0.0.1:8000/contacts/
-    (body:json, session_obj:AsyncSession)
-{
-  "first_name": "string",
-  "last_name": "string",
-  "email": "user2@example.com",
-  "note": "string",
-  "phone_number": "string"
-    } { validate shema } -> запрос к бд на создание контакта
-get_contact get http://127.0.0.1:8000/contacts/{contacts_id}
-update_contacts put http://127.0.0.1:8000/contacts/{contacts_id}
-    (id:int, body:json, session)
-    1.проверить есть ли такой контак по id
-    2.get_contact вернет объект конакта
-    3.используя body обновить котакт в базе данных
-    4.вернуть обьект контакта
-delete_contacts delete http://127.0.0.1:8000/contacts/{contacts_id}
-    (id:int, session)
-    1.проверить что такой контакт есть 
-    2.get_contact вернет обьект контакта
-    3.запрос к базе данных на удаление контакта
-"""
-
 
 @router.get("/all", response_model=list[ContactResponse])
 async def get_all_contacts(
@@ -53,6 +19,21 @@ async def get_all_contacts(
     db: AsyncSession = Depends(get_connection_db),
     user:Users=Depends(service.auth.get_current_user)
     )->list[Contacts]|None:
+    """
+    Получение всех контактов пользователя с пагинацией.
+
+    Этот эндпоинт возвращает список контактов, принадлежащих текущему
+    аутентифицированному пользователю, с поддержкой пагинации.
+
+    Args:
+        limit (int): Максимальное количество контактов для возврата.
+        offset (int): Смещение для пагинации.
+        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.
+        user (Users): Текущий аутентифицированный пользователь.
+
+    Returns:
+        list[Contacts] | None: Список контактов или None, если контакты не найдены.
+    """
     contacts = await repo_contacts.get_contacts(limit,offset,db,user)
     return contacts
 
@@ -62,6 +43,20 @@ async def create_contact(
         db: AsyncSession = Depends(get_connection_db),
         user:Users = Depends(service.auth.get_current_user),
         )->ContactResponse:
+    """
+    Создание нового контакта для пользователя.
+
+    Этот эндпоинт позволяет создать новый контакт для текущего
+    аутентифицированного пользователя.
+
+    Args:
+        body (CreateContact): Данные для создания нового контакта.
+        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.
+        user (Users): Текущий аутентифицированный пользователь.
+
+    Returns:
+        ContactResponse: Информация о созданном контакте.
+    """
     contact = await repo_contacts.create_contact(
         body,
         db,
@@ -76,6 +71,23 @@ async def get_contact(
     db:AsyncSession = (Depends(get_connection_db)),
     user:Users = Depends(service.auth.get_current_user)
 ):
+    """
+    Получение информации о контакте по его ID.
+
+    Этот эндпоинт возвращает информацию о контакте, принадлежащем
+    текущему аутентифицированному пользователю, по его ID.
+
+    Args:
+        contact_id (int): ID контакта.
+        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.
+        user (Users): Текущий аутентифицированный пользователь.
+
+    Returns:
+        ContactResponse: Информация о контакте.
+
+    Exception:
+        HTTPException: Если контакт не найден.
+    """
     #logic work in db
     contact =  await repo_contacts.get_contact_by_id(
         contact_id=contact_id,
@@ -88,13 +100,8 @@ async def get_contact(
             detail='not found ')
     return contact
 
-"""
-обновление контакта по id
-    get_contact_by_id проверяем что пользователю принадлежит контак
-    проверяем что контакт с тами id существует
-    обновляем контакт в базе данных
 
-"""
+
 @router.put("/{contact_id}")
 async def update_contact(
         body:CreateContact,
@@ -102,6 +109,24 @@ async def update_contact(
         db: AsyncSession = Depends(get_connection_db),
         user:Users = Depends(service.auth.get_current_user)
         ):
+    """
+    Обновление информации о контакте по его ID.
+
+    Этот эндпоинт обновляет информацию о контакте, принадлежащем
+    текущему аутентифицированному пользователю, по его ID.
+
+    Args:
+        body (CreateContact): Новые данные для обновления контакта.
+        contact_id (int): ID контакта.
+        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.
+        user (Users): Текущий аутентифицированный пользователь.
+
+    Returns:
+        Обновленный контакт.
+
+    Exceptions:
+        HTTPException: Если контакт не найден.
+    """
     curent_contact = await repo_contacts.get_contact_by_id(
         contact_id=contact_id,
         db=db,
@@ -126,6 +151,23 @@ async def delete_contact(
         db: AsyncSession = Depends(get_connection_db),
         user:Users = Depends(service.auth.get_current_user)
         ):
+    """
+    Удаление контакта по его ID.
+
+    Этот эндпоинт удаляет контакт, принадлежащий текущему
+    аутентифицированному пользователю, по его ID.
+
+    Args:
+        contact_id (int): ID контакта.
+        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.
+        user (Users): Текущий аутентифицированный пользователь.
+
+    Returns:
+        dict: Сообщение о статусе удаления контакта.
+
+    Exceptions:
+        HTTPException: Если контакт не найден или удаление невозможно из-за связанных данных.
+    """
     curent_contact = await repo_contacts.get_contact_by_id(
         contact_id=contact_id,
         db=db,

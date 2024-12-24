@@ -111,6 +111,7 @@ class JWTService:
                 self.SECRET_KEY, 
                 algorithms=[self.ALGORITHM]
             )
+            logger.info(f'pyload = {payload}')
             # проверка на наличие времени истечения действия токена
             exp = payload.get('exp')
             if exp is None:
@@ -124,7 +125,7 @@ class JWTService:
             #проверка на тип токена
             if payload['scope'] != token_type:
                 raise JWTError('Invalid token type')
-            
+            logger.infp('получил вот такую почту ',{payload.get('sub')})
             return payload.get('sub')
             
         except JWTError as err:
@@ -152,3 +153,5 @@ EmailService(JWTService)
     pocess_email_confirmation
     process_email_change_pass
 """
+
+

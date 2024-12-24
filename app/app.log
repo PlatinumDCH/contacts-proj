@@ -1,28 +1,7 @@
-INFO - 2024-12-24 15:34:35,288  -worker.py - Starting worker...
-INFO - 2024-12-24 15:34:35,298  -get_rab_con.py - соединение сосздано
-INFO - 2024-12-24 15:34:35,305  -worker.py - Worker is consuming messages...
-INFO - 2024-12-24 15:34:43,560  -jwt_serv.py - token type reset_password_token
-INFO - 2024-12-24 15:34:43,560  -email_serv.py - создать токен сброса пароля, успешно
-INFO - 2024-12-24 15:34:43,576  -email_serv.py - записать рефреш токен в дазу данных,успешно
-INFO - 2024-12-24 15:34:43,576  -email_serv.py - Отравка словаря с информацией к RabbitMQ: {'email': 'dimacheban23@meta.ua', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'reset_password', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaW1hY2hlYmFuMjNAbWV0YS51YSIsImV4cCI6MTczNTA5MDQ4MywiaWF0IjoxNzM1MDQ3MjgzLCJzY29wZSI6InJlc2V0X3Bhc3N3b3JkX3Rva2VuIn0.S8FYn6dToxQZUmboIV1GGKLc1UnfbJUZke8NXQcnWjk'} 
-INFO - 2024-12-24 15:34:43,576  -produse.py - Подготовка к отправке уведовления к RabbitMQ
-INFO - 2024-12-24 15:34:43,584  -get_rab_con.py - соединение сосздано
-INFO - 2024-12-24 15:34:43,590  -produse.py - Сообщение отправлено в RabbitMQ с ключом 'reset_password'
-INFO - 2024-12-24 15:34:43,590  -worker.py - Message data parsed: {'email': 'dimacheban23@meta.ua', 'username': 'string', 'host': 'http://127.0.0.1:8000/', 'queue_name': 'reset_password', 'token': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaW1hY2hlYmFuMjNAbWV0YS51YSIsImV4cCI6MTczNTA5MDQ4MywiaWF0IjoxNzM1MDQ3MjgzLCJzY29wZSI6InJlc2V0X3Bhc3N3b3JkX3Rva2VuIn0.S8FYn6dToxQZUmboIV1GGKLc1UnfbJUZke8NXQcnWjk'}
-INFO - 2024-12-24 15:34:43,590  -worker.py - Processing reset password message
-INFO - 2024-12-24 15:34:43,590  -worker.py - Sending email to: dimacheban23@meta.ua
-INFO - 2024-12-24 15:34:43,590  -worker.py - Using template: pasw/pasw_reset.html
-INFO - 2024-12-24 15:34:43,591  -get_rab_con.py - соединение закрыто
-INFO - 2024-12-24 15:34:43,591  -email_serv.py - отрпавить запрос к серверу rabbitmq, успешно
-INFO - 2024-12-24 15:34:45,129  -worker.py - Message precessed successfully : dimacheban23@meta.ua. Type: reset_password
-INFO - 2024-12-24 16:17:38,529  -users.py - start change password
-INFO - 2024-12-24 16:17:38,530  -users.py - get user
-INFO - 2024-12-24 16:17:38,598  -users.py - old_password == ? new_password 
-WARNING - 2024-12-24 16:17:38,644  -users.py - new password == old password, string, 123
-ERROR - 2024-12-24 16:17:38,644  -get_session.py - Session rollback, exception: 400: New password is the same as old password
-INFO - 2024-12-24 16:18:07,118  -users.py - start change password
-INFO - 2024-12-24 16:18:07,119  -users.py - get user
-INFO - 2024-12-24 16:18:07,123  -users.py - old_password == ? new_password 
-INFO - 2024-12-24 16:18:07,160  -users.py - string reset password
-INFO - 2024-12-24 16:18:07,177  -users.py - string del reset_password_token
-INFO - 2024-12-24 16:18:07,177  -users.py - password successfully updated
+INFO - 2024-12-24 18:55:04,470  -auth_serv.py - получил вот такой емеил None
+INFO - 2024-12-24 18:55:59,121  -auth.py - создал токен assess
+INFO - 2024-12-24 18:55:59,121  -auth.py - создал refresh токен
+INFO - 2024-12-24 18:55:59,135  -auth.py - обновил refresh токен в базе данных
+INFO - 2024-12-24 18:56:07,382  -auth_serv.py - получил вот такой емеил None
+INFO - 2024-12-24 18:57:34,038  -auth_serv.py - начало получение токена
+INFO - 2024-12-24 18:57:34,038  -auth_serv.py - получил вот такой емеил None

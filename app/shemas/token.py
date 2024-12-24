@@ -9,8 +9,11 @@ class TokenType(str, Enum):
 class TokenUpdateRequest(BaseModel):
     token: str
     token_type: TokenType  
-    
+
+
 class TokenSchema(BaseModel):
     access_token:str
     refresh_token:str
     token_type:str = 'bearer'
+
+

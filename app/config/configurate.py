@@ -4,6 +4,7 @@ from fastapi import FastAPI
 import redis.asyncio as redis
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_limiter import FastAPILimiter
+from enum import Enum
 
 class Settings(BaseSettings):
     PG_URL:str="postgresql+asyncpg://postgres:000000@localhost:5432/contacts"
@@ -49,3 +50,11 @@ async def lifespan(app:FastAPI):
     )
     await FastAPILimiter.init(redis_client)
     yield 
+
+class CorsIpBanned(Enum):
+    IPS = [
+        # ip_address('192.168.1.1'),
+        # ip_address('192.168.1.2'),
+        # ip_address('127.0.0.1')
+    ]
+    USER_AGENTS = [r'Googlebot',r'Python-urllib']

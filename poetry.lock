@@ -239,6 +239,17 @@ files = [
 ]
 
 [[package]]
+name = "certifi"
+version = "2024.12.14"
+description = "Python package for providing Mozilla's CA Bundle."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "certifi-2024.12.14-py3-none-any.whl", hash = "sha256:1275f7a45be9464efc1173084eaa30f866fe2e47d389406136d332ed4967ec56"},
+    {file = "certifi-2024.12.14.tar.gz", hash = "sha256:b650d30f370c2b724812bee08008be0c4163b163ddaec3f2546c1caf65f191db"},
+]
+
+[[package]]
 name = "cffi"
 version = "1.17.1"
 description = "Foreign Function Interface for Python calling C code."
@@ -330,6 +341,24 @@ files = [
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[[package]]
+name = "cloudinary"
+version = "1.41.0"
+description = "Python and Django SDK for Cloudinary"
+optional = false
+python-versions = "*"
+files = [
+    {file = "cloudinary-1.41.0.tar.gz", hash = "sha256:e189739a796a7d2ad15c19971741d33a9300816b16c0282b4b14ccf1dd2948c0"},
+]
+
+[package.dependencies]
+certifi = "*"
+six = "*"
+urllib3 = ">=1.26.5"
+
+[package.extras]
+dev = ["tox"]
 
 [[package]]
 name = "colorama"
@@ -1395,6 +1424,23 @@ files = [
 ]
 
 [[package]]
+name = "urllib3"
+version = "2.3.0"
+description = "HTTP library with thread-safe connection pooling, file post, and more."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "urllib3-2.3.0-py3-none-any.whl", hash = "sha256:1cee9ad369867bfdbbb48b7dd50374c0967a0bb7710050facf0dd6911440e3df"},
+    {file = "urllib3-2.3.0.tar.gz", hash = "sha256:f8c5449b3cf0861679ce7e0503c7b44b5ec981bec0d1d3795a07f1ba96f0204d"},
+]
+
+[package.extras]
+brotli = ["brotli (>=1.0.9)", "brotlicffi (>=0.8.0)"]
+h2 = ["h2 (>=4,<5)"]
+socks = ["pysocks (>=1.5.6,!=1.5.7,<2.0)"]
+zstd = ["zstandard (>=0.18.0)"]
+
+[[package]]
 name = "uvicorn"
 version = "0.34.0"
 description = "The lightning-fast ASGI server."
@@ -1511,4 +1557,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "143426f630edcaa8a7a2228e875ea81fd9a3e5de28cddb945dfd24d001a0c2df"
+content-hash = "80456a6463c823a389f154aded620667d61c0dadf1d430a5a4b65800a26e89ba"

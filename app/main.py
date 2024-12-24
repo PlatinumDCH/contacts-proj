@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from fastapi.staticfiles import StaticFiles
@@ -10,9 +10,10 @@ from app.db.get_session import get_connection_db
 from app.config.logger import logger
 from app.routers import contacts, auth, users
 from app.config.configurate import settings, configure_cors, lifespan
-
+from fastapi.templating import Jinja2Templates
 
 app = FastAPI(lifespan=lifespan)
+templates =  Jinja2Templates(directory='app/templates')
 configure_cors(app)
 
 app.mount('/static', StaticFiles(directory='app/templates/static'),name='static')
@@ -31,10 +32,14 @@ app.include_router(
 )
 
 @app.get('/')
-def index():
-    return {
-        'message':'this is a contacts aplication'
-    }
+def index(request:Request):
+    return templates.TemplateResponse(
+        'home.html',
+        {
+            'request':request,
+            
+        }
+    )
 
 @app.get("/api/healthchecker")
 async def healthchecker(db: AsyncSession = Depends(get_connection_db)):

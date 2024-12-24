@@ -17,7 +17,7 @@ class Contacts(BaseModel):
     last_name: Mapped[str] = mapped_column(String(50))
     email: Mapped[str] = mapped_column(String(25))
     phone_number: Mapped[str] = mapped_column(String)
-    # date_birthday: Mapped[Date] = mapped_column(Date)
+    date_birthday: Mapped[Date] = mapped_column(Date)
     note: Mapped[str] = mapped_column(String, default=None)
     created_at: Mapped[date] = mapped_column(
         "created_at", DateTime, default=func.now(), nullable=True)

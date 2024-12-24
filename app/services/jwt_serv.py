@@ -4,7 +4,8 @@ from jose import JWTError, jwt
 from typing import Optional
 import pytz
 
-from app.config import settings
+from app.config.configurate import settings
+from app.config.logger import logger
 
 class JWTService:
     SECRET_KEY = settings.SECRET_KEY_JWT
@@ -52,13 +53,63 @@ class JWTService:
             algorithm=self.ALGORITHM)
         return encoded_refresh_token
     
+    async def create_email_token(
+            self, 
+            data:dict, 
+            token_type:str,
+            expires_delta:Optional[float]=None
+            ):
+        to_encode = data.copy()
+        unc_now = datetime.now(pytz.UTC)
+        if expires_delta:
+            expire = unc_now + timedelta(hours=expires_delta)
+        else:
+            expire = unc_now + timedelta(hours=12)
+        to_encode.update({
+            'exp':expire,
+            'iat':datetime.now(pytz.UTC),
+            'scope': token_type
+        })
+        encoded_email_token = jwt.encode(
+            to_encode, 
+            self.SECRET_KEY, 
+            algorithm=self.ALGORITHM
+            )
+        logger.info(f'token type {to_encode["scope"]}')
+        return encoded_email_token
+    
+    async def create_re_pass_token(
+            self,
+            data:dict,
+            token_type:str,
+            expires_delta:Optional[float]=None
+    ):
+        to_encode = data.copy()
+        unc_now = datetime.now(pytz.UTC)
+        if expires_delta:
+            expire =  unc_now + timedelta(hours=expires_delta)
+        else:
+            expire = unc_now + timedelta(hours=12)
+        to_encode.update({
+            'exp':expire,
+            'iat':datetime.now(pytz.UTC),
+            'scope': token_type
+        })
+        encoded_re_pass_token = jwt.encode(
+            to_encode, 
+            self.SECRET_KEY, 
+            algorithm=self.ALGORITHM
+            )
+        logger.info(f'token type {to_encode["scope"]}')
+        return encoded_re_pass_token
+    
     async def decode_token(self, token: str, token_type: str) -> str:
         """возврат емейла, проверка вермини действия токена"""
         try:
             payload = jwt.decode(
-            token, 
-            self.SECRET_KEY, 
-            algorithms=[self.ALGORITHM]
+                token, 
+                self.SECRET_KEY, 
+                algorithms=[self.ALGORITHM]
             )
             # проверка на наличие времени истечения действия токена
             exp = payload.get('exp')
@@ -86,4 +137,18 @@ class JWTService:
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail='Invalid token'
                 )
-        
+
+"""
+JWTService
+    SECRET_KEY
+    ALGORITHM
+    create_access_token
+    create_refresh_token
+    create_email_token
+    create_re_pass_token
+    decode_token
+EmailService(JWTService)
+    send_email
+    pocess_email_confirmation
+    process_email_change_pass
+"""

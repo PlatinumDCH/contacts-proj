@@ -7,10 +7,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.get_session import get_connection_db
-from  app.repository import users as repo_users
+from app.repository import users as repo_users
 from app.config.logger import logger
 from app.services.base import service
 from app.config.configurate import settings
+from app.shemas.password import ResetPasswordSchema
 
 router = APIRouter(prefix='/auth', tags=['auth'])
 get_refresh_token = HTTPBearer()
@@ -152,4 +153,32 @@ async def login(
         'token_type':'bearer'
     }
 
+@router.post('/reset_password_request')
+async def forgot_password(
+    body:ResetPasswordSchema,
+    request:Request,
+    db:AsyncSession=Depends(get_connection_db)
+):
+    """
+    получить пользователя body.email
+    проверить есть ли такой пользователь в базе данных
+    тозадть токен сброса пароля
+    создать задачу на отравку письма сброса пароля
+    отправить письмо через rabbitmq
+        """
+    curent_user = await repo_users.get_user_by_email(body.email, db)
+    if not curent_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail='User not found'
+        )
+    logger.info('пользователь получен', curent_user.username)
+    await service.email.process_email_change_pass(
+        curent_user,
+        request,
+        db
+    )
+    return {
+        'message':'Check you email for reset password'
+    }
 

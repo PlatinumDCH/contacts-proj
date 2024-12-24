@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from typing import Optional
+from  datetime import date
 
 """
 CreareContact(first_name, last_name, email, phone_number,)
@@ -13,6 +14,7 @@ class CreateContact(BaseModel):
     email: EmailStr
     note: Optional[str]
     phone_number:str
+    date_birthday:date
     
 class ContactResponse(CreateContact):
     id:int

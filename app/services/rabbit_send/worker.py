@@ -51,7 +51,7 @@ async def process_message(message:IncomingMessage):
                     template_body={"host": host, "username": username,"token": token},    
                     subtype=MessageType.html,
                 )
-                template_name = 'pasw/psw_reset.html'
+                template_name = 'pasw/pasw_reset.html'
 
             elif message_type == 'confirm_email':
                 logger.info("Processing confirm email message")

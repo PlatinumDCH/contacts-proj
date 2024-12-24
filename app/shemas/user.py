@@ -12,3 +12,6 @@ class UserResponse(BaseModel):
 
 class NewUserSchema(UserSchema):
     avatart: str|None = None
+
+class ReauestEmail(BaseModel):
+    email:EmailStr

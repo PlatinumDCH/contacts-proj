@@ -13,3 +13,4 @@ INFO - 2024-12-23 19:04:51,056  -worker.py - Sending email to: dimacheban23@meta
 INFO - 2024-12-23 19:04:51,057  -worker.py - Using template: email/email_confirm.html
 INFO - 2024-12-23 19:04:53,240  -worker.py - Message precessed successfully : dimacheban23@meta.ua. Type: confirm_email
 INFO - 2024-12-23 19:05:22,877  -users.py - string open verifivation email
+INFO - 2024-12-23 19:15:26,622  -worker.py - Worker finished.

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status,Response
+from fastapi import APIRouter, Depends, HTTPException, status,Response, Request
 from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.repository import users as repo_users
@@ -6,6 +6,9 @@ from app.config.configurate import settings
 from app.db.get_session import get_connection_db
 from app.services.base import service
 from app.config.logger import logger
+from app.repository import users as repo_users
+from app.services.base import service
+from app.shemas.user import ReauestEmail
 
 router = APIRouter(prefix='/users', tags=['users'])
 
@@ -33,6 +36,24 @@ async def confirmed_email(
 
 
 @router.get('/{username}')
-async def request_email(username: str, response: Response, db: AsyncSession = Depends(get_connection_db)):
+async def request_email(username: str, response: Response, 
+                        db: AsyncSession = Depends(get_connection_db)):
+    """роут для отслеживания, открыл ли получатель письмо
+    в пистме есть статический прозрачный пиксель за которым браузер делает
+    запрос на сервер"""
     logger.info(f'{username} open verifivation email')
     return FileResponse("app/templates/static/open_check.png", media_type="image/png", content_disposition_type="inline")
+
+@router.post('/reauest_email')
+async def request_email(body:ReauestEmail,request:Request,
+                        db:AsyncSession=Depends(get_connection_db)):
+    """повторная отправка email для подтверждения"""
+    user = await repo_users.get_user_by_email(body.email, db)
+    if user.confirmed:
+        return {
+            'message':'You email is already confirmed'
+        }
+    await service.email.pocess_email_confirmation(user,request,db)
+    return {
+        {'message':'Email send, checck you post for confirmation'}
+    }

@@ -64,30 +64,12 @@ async def signup(
         )
     body.password = service.password.get_password_hash(body.password)
     new_user = await repo_users.create_user(body, db)
-    email_token = await service.email.create_email_token(
-       { 'sub':new_user.email}, 
-       settings.email_token
-    )
-    logger.info('создать email_token, успешно')
-
-    email_task = {
-        'email':new_user.email,
-        'username':new_user.username,
-        'host': str(request.base_url),
-        'queue_name':'confirm_email',
-        'token':email_token
-    }
-    await repo_users.update_token(
+    
+    await service.email.pocess_email_confirmation(
         new_user,
-        email_token,
-        settings.email_token,
+        request,
         db
     )
-    logger.info('обновить email_token в базе данных, успешно')
-    await service.email.send_email(
-        email_task=email_task
-    )
-    logger.info('отправить запрос к серверу, rabbit_mq, успешно')
     return {
         'id':new_user.id,
         'username':new_user.username,

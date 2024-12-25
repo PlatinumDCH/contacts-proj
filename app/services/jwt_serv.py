@@ -146,19 +146,6 @@ class JWTService:
                 detail='Invalid token'
                 )
 
-"""
-JWTService
-    SECRET_KEY
-    ALGORITHM
-    create_access_token
-    create_refresh_token
-    create_email_token
-    create_re_pass_token
-    decode_token
-EmailService(JWTService)
-    send_email
-    pocess_email_confirmation
-    process_email_change_pass
-"""
+
 
 

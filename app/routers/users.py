@@ -1,3 +1,4 @@
+import cloudinary.uploader
 from fastapi import APIRouter, Depends, HTTPException, status,Response, Request
 from fastapi import Body, UploadFile, File
 from fastapi.responses import FileResponse
@@ -156,7 +157,13 @@ async def request_email(username: str, response: Response,
         FileResponse: Изображение прозрачного пикселя, используемое для отслеживания.
     """
     logger.info(f'{username} open verifivation email')
-    return FileResponse("app/templates/static/open_check.png", media_type="image/png", content_disposition_type="inline")
+    return FileResponse(
+        "app/templates/static/open_check.png", 
+        media_type="image/png", 
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"
+        },
+        content_disposition_type="inline")
 
 @router.post('/request_email')
 async def request_email(body:ReauestEmail,request:Request,
@@ -290,3 +297,41 @@ async def change_password(
         'message':'password successfully updated'
         }
     
+@router.patch('/avatar', response_model=UserResponse,
+              dependencies=[Depends(RateLimiter(times=1, seconds=20))])
+async def load_new_avatar(
+    file:UploadFile = File(),
+    user:Users = Depends(service.auth.get_current_user),
+    db:AsyncSession = Depends(get_connection_db)):
+    """
+    Обработка загрузки нового аватаря для текущего пользователя .
+
+    Этот эндпоинт позволяет аутентифицированному пользователю загрузать
+    новое изображение аватара. Изабражение загружаетьс с Cloudinary и URL
+    аватара пользователя обновляеться в базе данных.Обновленная информация о
+    пользователе кешируется для бытрого доступа
+
+    Args:
+        file (UploadFile): Файл изображения аватара для загрузки.
+        user (Users): Текущий аутентифицированный пользователь, полученный
+        через зависимость.
+        db (AsyncSession): Сессия базы данных, полученная через зависимость.
+
+
+    Returns:
+        UserResponse: Обновленная информация о пользователе с новым URL аватара.
+
+    Raises:
+        HTTPException: Если пользователь не найден или произошла ошибка загрузки.
+    """
+    public_id = f'folder/{user.email}'
+    resurs = cloudinary.uploader.upload(file.file, public_id, owerride=True)
+    resurs_url = cloudinary.CloudinaryImage(public_id).build_url(
+        width=250,
+        height=250,
+        crop='fill',
+        version=resurs.get('version')
+    )
+    user = await repo_users.update_avatar_url(user.email, resurs_url, db)
+    service.auth.cashe.set(user.email, pickle.dumps(user))
+    service.auth.cashe.expire(user.email, 500)

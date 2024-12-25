@@ -17,21 +17,32 @@ alembic upgrade head
 
 ====================================
 ТУДУ:
+    дописать тесты для  repo_user
     
-    розобрася почему автоматически не показывает что пользователь открыл письмо
-    перенести
-        сделать роут на отправку письма сброса пароля
-        форма сброса пароля
-        
 
 ====================================
-get http://127.0.0.1:8000/api/contacts/all 
-post http://127.0.0.1:8000/api/contacts 
-get http://127.0.0.1:8000/api/contacts/{contacts-id} 
-put http://127.0.0.1:8000/api/contacts/{contacts-id}
-delete http://127.0.0.1:8000/api/contacts/5
-
 
 
 запуск воркера
-PYTHONPATH=/Users/plarium/Develop/cources/Python_web python app/services/rabbit_send/worker.py
+cd /Users/plarium/Develop/cources/Python_web/contacts-proj
+PYTHONPATH=. python app/services/rabbit_send/worker.py
+
+запусе pytest
+cd /Users/plarium/Develop/cources/Python_web/contacts-proj
+PYTHONPATH=. pytest
+
+Структура jwt service
+
+JWTService
+    SECRET_KEY
+    ALGORITHM
+    create_access_token
+    create_refresh_token
+    create_email_token
+    create_re_pass_token
+    decode_token
+EmailService(JWTService)
+    send_email
+    pocess_email_confirmation
+    process_email_change_pass
+"""

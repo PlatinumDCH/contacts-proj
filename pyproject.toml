@@ -29,6 +29,7 @@ python-multipart = "^0.0.20"
 fastapi-limiter = "^0.1.6"
 aioredis = "2.0.1"
 cloudinary = "^1.41.0"
+pytest = "^8.3.4"
 
 
 [build-system]

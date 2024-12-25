@@ -3,7 +3,6 @@ from fastapi import Depends
 from app.config.pack_roles import Role
 from app.services.base import service
 from app.db.get_session import get_connection_db
-from functools import partial
 from app.models.base_model import Users
 
 class RoleDepandency:

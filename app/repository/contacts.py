@@ -69,7 +69,7 @@ async def get_contact_by_id(contact_id:int, db:AsyncSession, user:Users)->Contac
 
 
 
-async def update_contact(body, contact:Contacts, db:AsyncSession, user:Users)->Contacts:
+async def update_contact(body, contact:Contacts, db:AsyncSession)->Contacts:
     """
     асинхронно обновляет данные контакта в базе данных.
 

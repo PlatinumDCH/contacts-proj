@@ -8,11 +8,13 @@ import app.repository.contacts as repo_contacts
 from app.services.base import service
 from app.models.base_model import Users,Contacts
 from app.shemas.contact import CreateContact, ContactResponse
+from app.depend.roles_dependies import role_dependency_all
 
 router = APIRouter(prefix="/contacts", tags=["contacts"])
 
 
-@router.get("/all", response_model=list[ContactResponse])
+@router.get("/all", response_model=list[ContactResponse],
+            dependencies=[Depends(role_dependency_all)])
 async def get_all_contacts(
     limit:int = Query(10, ge=10, le=500),
     offset:int = Query(0, ge=0, le=10),
@@ -37,7 +39,8 @@ async def get_all_contacts(
     contacts = await repo_contacts.get_contacts(limit,offset,db,user)
     return contacts
 
-@router.post("/", response_model=ContactResponse,status_code = status.HTTP_201_CREATED)
+@router.post("/", response_model=ContactResponse,status_code = status.HTTP_201_CREATED,
+             dependencies=[Depends(role_dependency_all)])
 async def create_contact(
         body:CreateContact,
         db: AsyncSession = Depends(get_connection_db),
@@ -65,7 +68,8 @@ async def create_contact(
     return contact
 
 
-@router.get("/{contact_id}", response_model=ContactResponse)
+@router.get("/{contact_id}", response_model=ContactResponse,
+            dependencies=[Depends(role_dependency_all)])
 async def get_contact(
     contact_id:int = Path(ge=1),
     db:AsyncSession = (Depends(get_connection_db)),
@@ -102,7 +106,7 @@ async def get_contact(
 
 
 
-@router.put("/{contact_id}")
+@router.put("/{contact_id}",dependencies=[Depends(role_dependency_all)])
 async def update_contact(
         body:CreateContact,
         contact_id:int,
@@ -145,7 +149,8 @@ async def update_contact(
     )
     return update_contact
 
-@router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{contact_id}", status_code=status.HTTP_204_NO_CONTENT,
+               dependencies=[Depends(role_dependency_all)])
 async def delete_contact(
         contact_id:int,
         db: AsyncSession = Depends(get_connection_db),

@@ -51,20 +51,17 @@ class AuthService:
             
         return user
 
-
-
-class RoleAccess(AuthService):
-    def __init__(self, allowed_roles:list[Role]):
-        self.allowed_roles = allowed_roles
-    
-    async def __call__(
-            self, 
-            request:Request,
-            user:Users = Depends(lambda:AuthService().get_current_user())):
-            # Проверяем, есть ли у пользователя подходящая роль
-            user = await user
-            logger.info(user.role, self.allowed_roles)
+    async def check_roles(
+            self,
+            token:str,
+            db:AsyncSession,
+            allowed_roles:list[Role]
+    )->Users:
+        """проверить если ли у пользователя допустимая роль"""
+        user = await self.get_current_user(token, db)
+        if user.role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail='Forbidden'
+                detail = f'Role {user.role} is not allowed'
             )
+        return user

@@ -3,20 +3,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.get_session import get_connection_db
 from app.config.logger import logger
 from sqlalchemy import text
-from app.services.auth_serv import RoleAccess
-from app.models.base_model import Users
-from app.services.base import service
-from app.config.pack_roles import Role
+from app.depend.roles_dependies import role_dependency_admin
 
 router = APIRouter(prefix="/config", tags=["configurate"])
-access_to_rolle_all = RoleAccess(
-    [Role.ADMIN, Role.MODERATOR]
-)
 
-@router.get("/healthchecker",dependencies=[Depends(access_to_rolle_all)])
-async def healthchecker(db: AsyncSession = Depends(get_connection_db),
-                        user:Users = Depends(service.auth.get_current_user)):
-    """вроверка подклюяения к базе данных"""
+
+@router.get("/healthchecker", dependencies=[Depends(role_dependency_admin)])
+async def healthchecker(db: AsyncSession = Depends(get_connection_db)
+                        ):
+    """вроверка подклюяения к базе данных
+    
+    Depends:
+        role_dependency_admin - зависимось которая проверяет что у пользователя
+        роль админ
+    Args:
+        звисимось подключения к базе данных
+    Returns:
+        if connection data pase corect, return messages
+        else HTTPExeption
+    """
     try:
         result = await db.execute(text("SELECT 1"))
         result = result.fetchone()

@@ -104,7 +104,7 @@ class JWTService:
         return encoded_re_pass_token
     
     async def decode_token(self, token: str, token_type: str) -> str:
-        """возврат емейла, проверка вермини действия токена"""
+        """возврат емейла, проверка времини действия токена"""
         try:
             payload = jwt.decode(
                 token, 
@@ -119,21 +119,28 @@ class JWTService:
             
             #проверка на истечение времени действия токена
             utc_now = datetime.now(pytz.UTC)
-            if utc_now > datetime.fromtimestamp(payload['exp'], tz=pytz.UTC):
+            if utc_now > datetime.fromtimestamp(exp, tz=pytz.UTC):
+                logger.info('токен протух')
                 raise JWTError('Token has expired')
 
             #проверка на тип токена
-            if payload['scope'] != token_type:
+            scope = payload.get('scope')
+            if scope != token_type:
+                logger.info(f'payload scope = {scope}')
                 raise JWTError('Invalid token type')
-            logger.infp('получил вот такую почту ',{payload.get('sub')})
-            return payload.get('sub')
+            
+            email = payload.get('sub')
+            logger.info(f'получил вот такую почту {email}')
+            return email
             
         except JWTError as err:
+            logger.error(f'Ошибка JWT: {err}')
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, 
                 detail=str(err)
                 )
         except Exception as err:
+            logger.error(f'Ошибка при обработке токена: {err}')
             HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST, 
                 detail='Invalid token'

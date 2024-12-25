@@ -31,3 +31,15 @@ INFO - 2024-12-25 13:46:16,625  -jwt_serv.py - pyload = {'sub': 'test@example.co
 INFO - 2024-12-25 13:46:16,625  -jwt_serv.py - получил вот такую почту test@example.com
 INFO - 2024-12-25 13:46:16,625  -auth_serv.py - получил вот такой емеил test@example.com
 INFO - 2024-12-25 13:46:16,626  -auth_serv.py - user {email} from cashe
+ERROR - 2024-12-25 14:07:35,375  -get_session.py - Session rollback, exception: OAuth2PasswordBearer.__call__() takes 2 positional arguments but 4 were given
+INFO - 2024-12-25 14:09:07,468  -auth_serv.py - начало получение токена
+INFO - 2024-12-25 14:09:07,478  -jwt_serv.py - pyload = {'sub': 'test@example.com', 'iat': 1735127134, 'exp': 1735129834, 'scope': 'access_token'}
+INFO - 2024-12-25 14:09:07,478  -jwt_serv.py - получил вот такую почту test@example.com
+INFO - 2024-12-25 14:09:07,478  -auth_serv.py - получил вот такой емеил test@example.com
+INFO - 2024-12-25 14:09:07,480  -auth_serv.py - User test@example.com from database
+INFO - 2024-12-25 14:09:07,535  -auth_serv.py - Checking cache for user test@example.com
+INFO - 2024-12-25 14:09:07,536  -auth_serv.py - начало получение токена
+INFO - 2024-12-25 14:09:07,537  -jwt_serv.py - pyload = {'sub': 'test@example.com', 'iat': 1735127134, 'exp': 1735129834, 'scope': 'access_token'}
+INFO - 2024-12-25 14:09:07,537  -jwt_serv.py - получил вот такую почту test@example.com
+INFO - 2024-12-25 14:09:07,537  -auth_serv.py - получил вот такой емеил test@example.com
+INFO - 2024-12-25 14:09:07,537  -auth_serv.py - user {email} from cashe

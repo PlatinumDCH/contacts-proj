@@ -1,66 +1,109 @@
-добавить кусок пути до проекта в PYTHONPATH .env
-пример:
-    PYTHONPATH = /Users/plarium/Develop/cources/Python_web/contacts-proj
-в фале можно импоритровать другие модули по абсолютному пути
-- запускать такой файл можно  с корневого каталога проета
+# Project Setup Guide
 
+## Environment Configuration
 
-запуск сервера
+### Add Project Path to `PYTHONPATH`
+
+Add the following line to your `.env` file to include the project path in `PYTHONPATH`:
+```env
+PYTHONPATH=/Users/plarium/Develop/cources/Python_web/contacts-proj
+```
+This allows importing other modules using absolute paths.
+
+### Server Startup
+Run the server using the following command:
+```bash
 uvicorn app.main:app --reload
+```
 
-работа с алембиком
-cd project/root
-alembic init <name folder>
-alembic revision --autogenerate -m 'commit'
-alembic upgrade head
+## Alembic Workflow
 
+1. **Initialize Alembic**:
+   ```bash
+   cd project/root
+   alembic init <name_folder>
+   ```
 
-====================================
-ТУДУ:
-    дописать тесты для  repo_user
-    
+2. **Generate a New Revision**:
+   ```bash
+   alembic revision --autogenerate -m "commit"
+   ```
 
-====================================
+3. **Apply Migrations**:
+   ```bash
+   alembic upgrade head
+   ```
 
-проверить покрытие тестами 
- pytest --cov=app 
+---
 
-запуск воркера
+## TODO:
+- Write additional tests for `repo_user`.
+
+---
+
+## Test Coverage
+Check the test coverage using:
+```bash
+pytest --cov=app
+```
+
+## Worker Startup
+Run the worker with:
+```bash
 cd /Users/plarium/Develop/cources/Python_web/contacts-proj
 PYTHONPATH=. python app/services/rabbit_send/worker.py
+```
 
-запусе pytest
+## Run Tests
+Execute tests with:
+```bash
 cd /Users/plarium/Develop/cources/Python_web/contacts-proj
 PYTHONPATH=. pytest
+```
 
+---
 
+## JWT Service Structure
 
-Структура jwt service
+### `JWTService`
+- **Attributes**:
+  - `SECRET_KEY`
+  - `ALGORITHM`
 
-JWTService
-    SECRET_KEY
-    ALGORITHM
-    create_access_token
-    create_refresh_token
-    create_email_token
-    create_re_pass_token
-    decode_token
-EmailService(JWTService)
-    send_email
-    pocess_email_confirmation
-    process_email_change_pass
-"""
+- **Methods**:
+  - `create_access_token`
+  - `create_refresh_token`
+  - `create_email_token`
+  - `create_re_pass_token`
+  - `decode_token`
 
-фикстура - функции, которые создают окружение вокруг тестов
+### `EmailService` (inherits from `JWTService`)
+- **Methods**:
+  - `send_email`
+  - `process_email_confirmation`
+  - `process_email_change_pass`
 
+---
 
-удалить файл из репозитория и добавить в гитигнор
+## Notes on Fixtures
+Fixtures are functions that set up the environment for tests.
 
-echo "name file" >> .gitignore
-git add .gitignore
-git commit -m "Add name_file to .gitignore"
+---
 
-git rm --cached .coverage простое удаление папки-файла
-git rm -r --cached .coverage рекурсивное удаление папки
-git commit -m "Removed .coverage from repository"
-git push
+## Remove a File from Repository and Add to `.gitignore`
+
+1. Add the file to `.gitignore`:
+   ```bash
+   echo "<file_name>" >> .gitignore
+   git add .gitignore
+   git commit -m "Add <file_name> to .gitignore"
+   ```
+
+2. Remove the file from the repository:
+   ```bash
+   git rm --cached <file_name>        # For a single file
+   git rm -r --cached <folder_name>   # For a folder
+   git commit -m "Removed <file_name> from repository"
+   git push
+   ```
+

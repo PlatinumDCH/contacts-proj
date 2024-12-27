@@ -3,3 +3,4 @@ test.db
 .coverage
 postgres-data/
 script/
+__pycache__/

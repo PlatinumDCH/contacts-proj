@@ -52,3 +52,15 @@ EmailService(JWTService)
 """
 
 фикстура - функции, которые создают окружение вокруг тестов
+
+
+удалить файл из репозитория и добавить в гитигнор
+
+echo "name file" >> .gitignore
+git add .gitignore
+git commit -m "Add name_file to .gitignore"
+
+git rm --cached .coverage простое удаление папки-файла
+git rm -r --cached .coverage рекурсивное удаление папки
+git commit -m "Removed .coverage from repository"
+git push

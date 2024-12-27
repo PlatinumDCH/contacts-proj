@@ -14,6 +14,7 @@ from app.config.configurate import settings
 from app.shemas.password import ResetPasswordSchema
 
 router = APIRouter(prefix='/auth', tags=['auth'])
+
 get_refresh_token = HTTPBearer()
 
 
@@ -36,7 +37,7 @@ async def signup(
         }
         type:UserSchema
 
-        request = ...
+        request = requests
         type: Request
 
         db = ассинхроннай коннект к базе данных
@@ -54,7 +55,6 @@ async def signup(
         создатие словаря не необходимой информацией для отправки письма подтв.
         добавить емеил токен в базу данных
         отрпавить токен и словарь с данными для отправки в сервис rabbitmq
-    
     """
     exist_user = await repo_users.get_user_by_email(body.email, db)
     if exist_user:
@@ -104,7 +104,7 @@ async def login(
         dict: dict{access_token:X, refresh_token:X, token_type:X}
 
     Descriprion:
-        *username == email, в данному случае
+        username == email, в данному случае
         получить пользователя запросом к базе данных (email)
         если ответ None, такого пользователя нету
         если поле confirmed(подтв почта) = False. не пускать

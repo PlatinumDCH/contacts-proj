@@ -14,14 +14,14 @@ async def get_user_by_email(email:str,db: AsyncSession =
     """
     Получить пользователя пол его адресу електронной почты из дазы данных.
 
-        Args:
-            email (str): Адрес електронной посчты пользователя, которого
-                нужно получить.
-            db (AsyncSession, optional): Зависимось сессии базы данных.
-                по уиолчанию используется асинхронная сесия из get_connection_db
+    Args:
+        email (str): Адрес електронной посчты пользователя, которого нужно получить.
+                
+        db (AsyncSession, optional): Зависимось сессии базы данных.По уиолчанию используется асинхронная сесия из
+        get_connection_db
 
-        Returns:
-            Users | None: The user object if found, otherwise None.
+    Returns:
+        Users | None: The user object if found, otherwise None.
     """
     
     query = select(Users).filter_by(email=email)
@@ -61,6 +61,20 @@ async def create_user(
     await db.refresh(new_user)
     return new_user
 
+"""
+Descriptions:
+        Что делает функция:
+        1. Находит токены пользователя в базе данных:
+            user_tokens = UserTokensTable(
+                user_id=1,
+                refresh_token="old_token",
+                email_token="email_token"
+            )
+        2. Если `user_tokens` не None, обновляем значение токена.
+        3. Если `user_tokens` is None, создаёт новый объект `UserTokensTable` с user_id и значением токена.
+        4. Сохраняет изменения в базе данных.
+        5. Обрабатывает ошибки, открывая транзакцию.
+"""
 async def update_token(
         user: Users,
         token: TokenUpdateRequest,
@@ -70,23 +84,10 @@ async def update_token(
     обновить токен пользователя в базе данных
 
     Args:
-        user (UsetsTable): обьнкт пользователя и идентификатором пользователя.
+        user (UsetsTable): объект пользователя с идентификатором пользователя.
         token (str): новое значение токена для сохранения.
         token_type (str): тип токена (e.g., "refresh_token").
-        db (AsyncSession): сассия базы данных для выполнения запросов.
-
-    что делает функция:
-        1. находит токены пользователя в базе данных.
-            user_tokens = UserTokensTable(
-                    user_id=1,
-                    refresh_token="old_token",
-                    email_token="email_token"
-                    )
-        2. если user_tokens не None, обновляем значение токена
-        3. если  user_tokens is None, создает новый обьект UserTokensTable 
-        с user_id и значение токена
-        4. созраняет изменения в базе данных.
-        5. обрабатывает ошибки, открываея транкзацию.
+        db (AsyncSession): сессия базы данных для выполнения запросов.
 
     Returns:
         None
@@ -95,6 +96,7 @@ async def update_token(
         user_query = select(UserTokensTable).filter_by(user_id=user.id)
         result = await db.execute(user_query)
         user_tokens = result.scalar_one_or_none()
+        
         if user_tokens:
             setattr(user_tokens, token_type, token)
             update_query = (

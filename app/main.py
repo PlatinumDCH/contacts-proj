@@ -3,7 +3,7 @@ from sqlalchemy import text
 from fastapi.staticfiles import StaticFiles
 from fastapi_limiter import FastAPILimiter
 from fastapi_limiter.depends import RateLimiter
-
+from pathlib import Path
 
 
 from app.config.logger import logger
@@ -15,8 +15,9 @@ from app.middleware.middleware_set import user_agent_ban_middleware
 from app.middleware.middleware_set import banned_ips_middleware
 
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 app = FastAPI(lifespan=lifespan)
-templates =  Jinja2Templates(directory='app/templates')
+templates =  Jinja2Templates(directory=BASE_DIR/'app'/'templates')
 configure_cors(app)
 
 @app.middleware('http')
@@ -27,7 +28,7 @@ async def add_user_agent_ban_middleware(request:Request, call_next: Callable):
 async def add_banned_ip_middleware(request:Request, call_next: Callable):
     return await banned_ips_middleware(request, call_next)
 
-app.mount('/static', StaticFiles(directory='app/templates/static'),name='static')
+app.mount('/static', StaticFiles(directory=BASE_DIR/'app'/'templates'/'static'),name='static')
 
 app.include_router(
     router=users.router,

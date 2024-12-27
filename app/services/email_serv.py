@@ -16,6 +16,7 @@ class EmailService(JWTService):
     async def send_email(self, email_task:dict):
         """
         отравка email задачи в rabbitmq
+        
         email_task = {
             'email':new_user.email,
             'username':new_user.username,

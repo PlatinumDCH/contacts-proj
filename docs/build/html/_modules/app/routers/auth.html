@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+
+<html lang="ru" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app.routers.auth &#8212; документация contacts 0.1</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=490fdf2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/translations.js?v=5b699b7f"></script>
+    <link rel="index" title="Алфавитный указатель" href="../../../genindex.html" />
+    <link rel="search" title="Поиск" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Исходный код app.routers.auth</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">status</span><span class="p">,</span> <span class="n">Request</span><span class="p">,</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">HTTPException</span>
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">Security</span>
+<span class="kn">from</span> <span class="nn">app.shemas.user</span> <span class="kn">import</span> <span class="n">UserResponse</span><span class="p">,</span> <span class="n">UserSchema</span>
+<span class="kn">from</span> <span class="nn">app.shemas.token</span> <span class="kn">import</span> <span class="n">TokenSchema</span>
+<span class="kn">from</span> <span class="nn">fastapi.security</span> <span class="kn">import</span> <span class="n">HTTPBearer</span>
+<span class="kn">from</span> <span class="nn">fastapi.security</span> <span class="kn">import</span> <span class="n">OAuth2PasswordRequestForm</span>
+<span class="kn">from</span> <span class="nn">fastapi.security</span> <span class="kn">import</span> <span class="n">HTTPAuthorizationCredentials</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.asyncio</span> <span class="kn">import</span> <span class="n">AsyncSession</span>
+<span class="kn">from</span> <span class="nn">app.db.get_session</span> <span class="kn">import</span> <span class="n">get_connection_db</span>
+<span class="kn">from</span> <span class="nn">app.repository</span> <span class="kn">import</span> <span class="n">users</span> <span class="k">as</span> <span class="n">repo_users</span>
+<span class="kn">from</span> <span class="nn">app.config.logger</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">app.services.base</span> <span class="kn">import</span> <span class="n">service</span>
+<span class="kn">from</span> <span class="nn">app.config.configurate</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">app.shemas.password</span> <span class="kn">import</span> <span class="n">ResetPasswordSchema</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;/auth&#39;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">])</span>
+
+<span class="n">get_refresh_token</span> <span class="o">=</span> <span class="n">HTTPBearer</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="signup">
+<a class="viewcode-back" href="../../../index.html#app.routers.auth.signup">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/signup&#39;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">UserResponse</span><span class="p">,</span>
+             <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_201_CREATED</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">signup</span><span class="p">(</span>
+    <span class="n">body</span><span class="p">:</span> <span class="n">UserSchema</span><span class="p">,</span>
+    <span class="n">request</span><span class="p">:</span><span class="n">Request</span><span class="p">,</span>
+    <span class="n">db</span><span class="p">:</span><span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">)</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    регистрация пользователя на сайте</span>
+
+<span class="sd">    Args:</span>
+
+<span class="sd">        body = {</span>
+<span class="sd">            username</span>
+<span class="sd">            email</span>
+<span class="sd">            password</span>
+<span class="sd">        }</span>
+<span class="sd">        type:UserSchema</span>
+
+<span class="sd">        request = requests</span>
+<span class="sd">        type: Request</span>
+
+<span class="sd">        db = ассинхроннай коннект к базе данных</span>
+<span class="sd">        type:AsseyncSession</span>
+<span class="sd">        descriptions: автоматический вызов get_connection_db</span>
+
+<span class="sd">    Return:</span>
+<span class="sd">        dict</span>
+
+<span class="sd">    Description:</span>
+<span class="sd">        проверка на наличине пользователя(email) в базе данных</span>
+<span class="sd">        перевод вводимого пароля в хешированый</span>
+<span class="sd">        создание нового пользователя в базе данных repo_users</span>
+<span class="sd">        создание токена email_token для подвтерждения почты</span>
+<span class="sd">        создатие словаря не необходимой информацией для отправки письма подтв.</span>
+<span class="sd">        добавить емеил токен в базу данных</span>
+<span class="sd">        отрпавить токен и словарь с данными для отправки в сервис rabbitmq</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">exist_user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_users</span><span class="o">.</span><span class="n">get_user_by_email</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">exist_user</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;user already exists in database&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_409_CONFLICT</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;account already exists&#39;</span>
+        <span class="p">)</span>
+    <span class="n">body</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">service</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">get_password_hash</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
+    <span class="n">new_user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_users</span><span class="o">.</span><span class="n">create_user</span><span class="p">(</span><span class="n">body</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+
+    <span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">pocess_email_confirmation</span><span class="p">(</span>
+        <span class="n">new_user</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">db</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="n">new_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="s1">&#39;username&#39;</span><span class="p">:</span><span class="n">new_user</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+        <span class="s1">&#39;email&#39;</span><span class="p">:</span><span class="n">new_user</span><span class="o">.</span><span class="n">email</span>
+    <span class="p">}</span></div>
+
+    
+
+
+<div class="viewcode-block" id="login">
+<a class="viewcode-back" href="../../../index.html#app.routers.auth.login">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">login</span><span class="p">(</span>
+    <span class="n">body</span><span class="p">:</span> <span class="n">OAuth2PasswordRequestForm</span><span class="o">=</span><span class="n">Depends</span><span class="p">(),</span>
+    <span class="n">db</span><span class="p">:</span><span class="n">AsyncSession</span><span class="o">=</span><span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">)</span>
+<span class="p">)</span><span class="o">-&gt;</span><span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Aутентификация пользователя и выдача токенов доступа и обновления</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        body:</span>
+<span class="sd">        type:OAuth2PasswordRequestForm (application/x-www-form-urlencoded)</span>
+<span class="sd">        descriptions: принимает body в виде form_data, требуются обезательные </span>
+<span class="sd">        поля username - password. Автоматически извлекает данные из тела запроса.</span>
+
+<span class="sd">        db: асинхронная сессия базы данных</span>
+<span class="sd">        type: AsyncSession</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        HTTPException: Invalid email</span>
+<span class="sd">        HTTPException: Invalid password</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: dict{access_token:X, refresh_token:X, token_type:X}</span>
+
+<span class="sd">    Descriprion:</span>
+<span class="sd">        username == email, в данному случае</span>
+<span class="sd">        получить пользователя запросом к базе данных (email)</span>
+<span class="sd">        если ответ None, такого пользователя нету</span>
+<span class="sd">        если поле confirmed(подтв почта) = False. не пускать</span>
+<span class="sd">        если пароли не совпадают (введенный и созраненный в бд), не пускать</span>
+<span class="sd">        если все ок, создаем новую пару токенов</span>
+<span class="sd">        обновляем в бд рефреш-токен пользователя</span>
+<span class="sd">        возвращаем jwt-token (combo access|refersg|token_type)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_users</span><span class="o">.</span><span class="n">get_user_by_email</span><span class="p">(</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+        <span class="n">db</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">user</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Не нашел email в дазе данных&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;envalid email&#39;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user</span><span class="o">.</span><span class="n">confirmed</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;емеил не подтвержден в базе данных&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Account not confirmed, check email&#39;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">service</span><span class="o">.</span><span class="n">password</span><span class="o">.</span><span class="n">verify_password</span><span class="p">(</span>
+        <span class="n">body</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+        <span class="n">user</span><span class="o">.</span><span class="n">password</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">infog</span><span class="p">(</span><span class="s1">&#39;пароли не совпадают&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_401_UNAUTHORIZED</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Invalid pass&#39;</span>
+        <span class="p">)</span>
+    <span class="n">encoded_assess_token</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">jwt</span><span class="o">.</span><span class="n">create_access_token</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sub&#39;</span><span class="p">:</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;создал токен assess&#39;</span><span class="p">)</span>
+    <span class="n">encoded_refresh_token</span> <span class="o">=</span> <span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">jwt</span><span class="o">.</span><span class="n">create_refresh_token</span><span class="p">(</span>
+        <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;sub&#39;</span><span class="p">:</span><span class="n">user</span><span class="o">.</span><span class="n">email</span><span class="p">}</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;создал refresh токен&#39;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">repo_users</span><span class="o">.</span><span class="n">update_token</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">encoded_refresh_token</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">refresh_token</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;обновил refresh токен в базе данных&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;access_token&#39;</span><span class="p">:</span><span class="n">encoded_assess_token</span><span class="p">,</span>
+        <span class="s1">&#39;refresh_token&#39;</span><span class="p">:</span><span class="n">encoded_refresh_token</span><span class="p">,</span>
+        <span class="s1">&#39;token_type&#39;</span><span class="p">:</span><span class="s1">&#39;bearer&#39;</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="forgot_password">
+<a class="viewcode-back" href="../../../index.html#app.routers.auth.forgot_password">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s1">&#39;/reset_password_request&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">forgot_password</span><span class="p">(</span>
+    <span class="n">body</span><span class="p">:</span><span class="n">ResetPasswordSchema</span><span class="p">,</span>
+    <span class="n">request</span><span class="p">:</span><span class="n">Request</span><span class="p">,</span>
+    <span class="n">db</span><span class="p">:</span><span class="n">AsyncSession</span><span class="o">=</span><span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">)</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    получить пользователя body.email</span>
+<span class="sd">    проверить есть ли такой пользователь в базе данных</span>
+<span class="sd">    тозадть токен сброса пароля</span>
+<span class="sd">    создать задачу на отравку письма сброса пароля</span>
+<span class="sd">    отправить письмо через rabbitmq</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="n">curent_user</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_users</span><span class="o">.</span><span class="n">get_user_by_email</span><span class="p">(</span><span class="n">body</span><span class="o">.</span><span class="n">email</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">curent_user</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;User not found&#39;</span>
+        <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;пользователь получен&#39;</span><span class="p">,</span> <span class="n">curent_user</span><span class="o">.</span><span class="n">username</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">service</span><span class="o">.</span><span class="n">email</span><span class="o">.</span><span class="n">process_email_change_pass</span><span class="p">(</span>
+        <span class="n">curent_user</span><span class="p">,</span>
+        <span class="n">request</span><span class="p">,</span>
+        <span class="n">db</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;message&#39;</span><span class="p">:</span><span class="s1">&#39;Check you email for reset password&#39;</span>
+    <span class="p">}</span></div>
+
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">contacts</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Навигация</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Код модуля</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, DCH.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

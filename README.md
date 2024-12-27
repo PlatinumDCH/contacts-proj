@@ -22,6 +22,8 @@ alembic upgrade head
 
 ====================================
 
+проверить покрытие тестами 
+ pytest --cov=app 
 
 запуск воркера
 cd /Users/plarium/Develop/cources/Python_web/contacts-proj
@@ -30,6 +32,8 @@ PYTHONPATH=. python app/services/rabbit_send/worker.py
 запусе pytest
 cd /Users/plarium/Develop/cources/Python_web/contacts-proj
 PYTHONPATH=. pytest
+
+
 
 Структура jwt service
 
@@ -46,3 +50,5 @@ EmailService(JWTService)
     pocess_email_confirmation
     process_email_change_pass
 """
+
+фикстура - функции, которые создают окружение вокруг тестов

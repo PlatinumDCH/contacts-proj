@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html lang="ru" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app.routers.contacts &#8212; документация contacts 0.1</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=686e5160" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=490fdf2e"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/translations.js?v=5b699b7f"></script>
+    <link rel="index" title="Алфавитный указатель" href="../../../genindex.html" />
+    <link rel="search" title="Поиск" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Исходный код app.routers.contacts</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">Depends</span><span class="p">,</span> <span class="n">APIRouter</span><span class="p">,</span> <span class="n">HTTPException</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">status</span>
+<span class="kn">from</span> <span class="nn">fastapi</span> <span class="kn">import</span> <span class="n">Query</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="kn">import</span> <span class="n">IntegrityError</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.asyncio</span> <span class="kn">import</span> <span class="n">AsyncSession</span>
+
+<span class="kn">from</span> <span class="nn">app.db.get_session</span> <span class="kn">import</span> <span class="n">get_connection_db</span>
+<span class="kn">import</span> <span class="nn">app.repository.contacts</span> <span class="k">as</span> <span class="nn">repo_contacts</span>
+<span class="kn">from</span> <span class="nn">app.services.base</span> <span class="kn">import</span> <span class="n">service</span>
+<span class="kn">from</span> <span class="nn">app.models.base_model</span> <span class="kn">import</span> <span class="n">Users</span><span class="p">,</span><span class="n">Contacts</span>
+<span class="kn">from</span> <span class="nn">app.shemas.contact</span> <span class="kn">import</span> <span class="n">CreateContact</span><span class="p">,</span> <span class="n">ContactResponse</span>
+<span class="kn">from</span> <span class="nn">app.depend.roles_dependies</span> <span class="kn">import</span> <span class="n">role_dependency_all</span>
+
+<span class="n">router</span> <span class="o">=</span> <span class="n">APIRouter</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;/contacts&quot;</span><span class="p">,</span> <span class="n">tags</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;contacts&quot;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="get_all_contacts">
+<a class="viewcode-back" href="../../../index.html#app.routers.contacts.get_all_contacts">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/all&quot;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="nb">list</span><span class="p">[</span><span class="n">ContactResponse</span><span class="p">],</span>
+            <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">role_dependency_all</span><span class="p">)])</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">get_all_contacts</span><span class="p">(</span>
+    <span class="n">limit</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">500</span><span class="p">),</span>
+    <span class="n">offset</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">le</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span>
+    <span class="n">db</span><span class="p">:</span> <span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">),</span>
+    <span class="n">user</span><span class="p">:</span><span class="n">Users</span><span class="o">=</span><span class="n">Depends</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">)</span>
+    <span class="p">)</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">[</span><span class="n">Contacts</span><span class="p">]</span><span class="o">|</span><span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Получение всех контактов пользователя с пагинацией.</span>
+
+<span class="sd">    Этот эндпоинт возвращает список контактов, принадлежащих текущему</span>
+<span class="sd">    аутентифицированному пользователю, с поддержкой пагинации.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        limit (int): Максимальное количество контактов для возврата.</span>
+<span class="sd">        offset (int): Смещение для пагинации.</span>
+<span class="sd">        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.</span>
+<span class="sd">        user (Users): Текущий аутентифицированный пользователь.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list[Contacts] | None: Список контактов или None, если контакты не найдены.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">contacts</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">get_contacts</span><span class="p">(</span><span class="n">limit</span><span class="p">,</span><span class="n">offset</span><span class="p">,</span><span class="n">db</span><span class="p">,</span><span class="n">user</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">contacts</span></div>
+
+
+<div class="viewcode-block" id="create_contact">
+<a class="viewcode-back" href="../../../index.html#app.routers.contacts.create_contact">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">ContactResponse</span><span class="p">,</span><span class="n">status_code</span> <span class="o">=</span> <span class="n">status</span><span class="o">.</span><span class="n">HTTP_201_CREATED</span><span class="p">,</span>
+             <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">role_dependency_all</span><span class="p">)])</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">create_contact</span><span class="p">(</span>
+        <span class="n">body</span><span class="p">:</span><span class="n">CreateContact</span><span class="p">,</span>
+        <span class="n">db</span><span class="p">:</span> <span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">),</span>
+        <span class="n">user</span><span class="p">:</span><span class="n">Users</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">-&gt;</span><span class="n">ContactResponse</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Создание нового контакта для пользователя.</span>
+
+<span class="sd">    Этот эндпоинт позволяет создать новый контакт для текущего</span>
+<span class="sd">    аутентифицированного пользователя.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        body (CreateContact): Данные для создания нового контакта.</span>
+<span class="sd">        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.</span>
+<span class="sd">        user (Users): Текущий аутентифицированный пользователь.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ContactResponse: Информация о созданном контакте.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">contact</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">create_contact</span><span class="p">(</span>
+        <span class="n">body</span><span class="p">,</span>
+        <span class="n">db</span><span class="p">,</span>
+        <span class="n">user</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">contact</span></div>
+
+
+
+<div class="viewcode-block" id="get_contact">
+<a class="viewcode-back" href="../../../index.html#app.routers.contacts.get_contact">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/</span><span class="si">{contact_id}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">response_model</span><span class="o">=</span><span class="n">ContactResponse</span><span class="p">,</span>
+            <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">role_dependency_all</span><span class="p">)])</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">get_contact</span><span class="p">(</span>
+    <span class="n">contact_id</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">ge</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+    <span class="n">db</span><span class="p">:</span><span class="n">AsyncSession</span> <span class="o">=</span> <span class="p">(</span><span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">)),</span>
+    <span class="n">user</span><span class="p">:</span><span class="n">Users</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">)</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Получение информации о контакте по его ID.</span>
+
+<span class="sd">    Этот эндпоинт возвращает информацию о контакте, принадлежащем</span>
+<span class="sd">    текущему аутентифицированному пользователю, по его ID.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        contact_id (int): ID контакта.</span>
+<span class="sd">        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.</span>
+<span class="sd">        user (Users): Текущий аутентифицированный пользователь.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ContactResponse: Информация о контакте.</span>
+
+<span class="sd">    Exception:</span>
+<span class="sd">        HTTPException: Если контакт не найден.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#logic work in db</span>
+    <span class="n">contact</span> <span class="o">=</span>  <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">get_contact_by_id</span><span class="p">(</span>
+        <span class="n">contact_id</span><span class="o">=</span><span class="n">contact_id</span><span class="p">,</span>
+        <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span>
+        <span class="n">user</span><span class="o">=</span><span class="n">user</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">contact</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;not found &#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">contact</span></div>
+
+
+
+
+<div class="viewcode-block" id="update_contact">
+<a class="viewcode-back" href="../../../index.html#app.routers.contacts.update_contact">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="s2">&quot;/</span><span class="si">{contact_id}</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">role_dependency_all</span><span class="p">)])</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">update_contact</span><span class="p">(</span>
+        <span class="n">body</span><span class="p">:</span><span class="n">CreateContact</span><span class="p">,</span>
+        <span class="n">contact_id</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">db</span><span class="p">:</span> <span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">),</span>
+        <span class="n">user</span><span class="p">:</span><span class="n">Users</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">)</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Обновление информации о контакте по его ID.</span>
+
+<span class="sd">    Этот эндпоинт обновляет информацию о контакте, принадлежащем</span>
+<span class="sd">    текущему аутентифицированному пользователю, по его ID.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        body (CreateContact): Новые данные для обновления контакта.</span>
+<span class="sd">        contact_id (int): ID контакта.</span>
+<span class="sd">        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.</span>
+<span class="sd">        user (Users): Текущий аутентифицированный пользователь.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Обновленный контакт.</span>
+
+<span class="sd">    Exceptions:</span>
+<span class="sd">        HTTPException: Если контакт не найден.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">curent_contact</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">get_contact_by_id</span><span class="p">(</span>
+        <span class="n">contact_id</span><span class="o">=</span><span class="n">contact_id</span><span class="p">,</span>
+        <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span>
+        <span class="n">user</span><span class="o">=</span><span class="n">user</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">curent_contact</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;not found contact, fail id&#39;</span>
+        <span class="p">)</span>
+    <span class="n">update_contact</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">update_contact</span><span class="p">(</span>
+        <span class="n">body</span><span class="p">,</span>
+        <span class="n">curent_contact</span><span class="p">,</span>
+        <span class="n">db</span><span class="p">,</span>
+        <span class="n">user</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">update_contact</span></div>
+
+
+<div class="viewcode-block" id="delete_contact">
+<a class="viewcode-back" href="../../../index.html#app.routers.contacts.delete_contact">[документация]</a>
+<span class="nd">@router</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/</span><span class="si">{contact_id}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_204_NO_CONTENT</span><span class="p">,</span>
+               <span class="n">dependencies</span><span class="o">=</span><span class="p">[</span><span class="n">Depends</span><span class="p">(</span><span class="n">role_dependency_all</span><span class="p">)])</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">delete_contact</span><span class="p">(</span>
+        <span class="n">contact_id</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span>
+        <span class="n">db</span><span class="p">:</span> <span class="n">AsyncSession</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">get_connection_db</span><span class="p">),</span>
+        <span class="n">user</span><span class="p">:</span><span class="n">Users</span> <span class="o">=</span> <span class="n">Depends</span><span class="p">(</span><span class="n">service</span><span class="o">.</span><span class="n">auth</span><span class="o">.</span><span class="n">get_current_user</span><span class="p">)</span>
+        <span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Удаление контакта по его ID.</span>
+
+<span class="sd">    Этот эндпоинт удаляет контакт, принадлежащий текущему</span>
+<span class="sd">    аутентифицированному пользователю, по его ID.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        contact_id (int): ID контакта.</span>
+<span class="sd">        db (AsyncSession): Асинхронная сессия базы данных, полученная через зависимость.</span>
+<span class="sd">        user (Users): Текущий аутентифицированный пользователь.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Сообщение о статусе удаления контакта.</span>
+
+<span class="sd">    Exceptions:</span>
+<span class="sd">        HTTPException: Если контакт не найден или удаление невозможно из-за связанных данных.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">curent_contact</span> <span class="o">=</span> <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">get_contact_by_id</span><span class="p">(</span>
+        <span class="n">contact_id</span><span class="o">=</span><span class="n">contact_id</span><span class="p">,</span>
+        <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span>
+        <span class="n">user</span><span class="o">=</span><span class="n">user</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">curent_contact</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_404_NOT_FOUND</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;not found contact, fail id&#39;</span>
+        <span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">repo_contacts</span><span class="o">.</span><span class="n">delete_contact</span><span class="p">(</span><span class="n">curent_contact</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;detail&#39;</span><span class="p">:</span><span class="s1">&#39;contact was deleted&#39;</span>
+        <span class="p">}</span>
+    <span class="k">except</span> <span class="n">IntegrityError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">HTTPException</span><span class="p">(</span>
+            <span class="n">status_code</span><span class="o">=</span><span class="n">status</span><span class="o">.</span><span class="n">HTTP_400_BAD_REQUEST</span><span class="p">,</span>
+            <span class="n">detail</span><span class="o">=</span><span class="s1">&#39;Cannot delete contact due to related data&#39;</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">contacts</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Искать" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Навигация</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Код модуля</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, DCH.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.1.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -121,21 +121,21 @@ async def login(
         logger.info('Не нашел email в дазе данных')
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='envalid email'
+            detail='Invalid email'
+        )
+    if not service.password.verify_password(
+        body.password,
+        user.password):
+        logger.info('пароли не совпадают')
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail='Invalid pass'
         )
     if not user.confirmed:
         logger.info('емеил не подтвержден в базе данных')
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Account not confirmed, check email'
-        )
-    if not service.password.verify_password(
-        body.password,
-        user.password):
-        logger.infog('пароли не совпадают')
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Invalid pass'
         )
     encoded_assess_token = await service.jwt.create_access_token(
         data={'sub':user.email}
@@ -172,7 +172,7 @@ async def forgot_password(
             status_code=status.HTTP_404_NOT_FOUND,
             detail='User not found'
         )
-    logger.info('пользователь получен', curent_user.username)
+    logger.info(f'пользователь получен {curent_user.username}')
     await service.email.process_email_change_pass(
         curent_user,
         request,

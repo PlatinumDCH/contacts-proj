@@ -1,1 +1,5 @@
 .env
+test.db
+.coverage
+postgres-data/
+script/

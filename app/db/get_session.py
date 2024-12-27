@@ -17,7 +17,8 @@ class DatabaseSessionManager:
         _session_maker(async_sessionmaker: фабрика для созданния скессий.
 
     """
-    def __init__(self, url:str):
+
+    def __init__(self, url: str):
         """
         Инициализирует менеджер сессий базы данных.
 
@@ -25,10 +26,8 @@ class DatabaseSessionManager:
             url (str): URl для подлючения к базе данных.
         """
         self._engine: AsyncEngine | None = create_async_engine(url)
-        self._session_maker: async_sessionmaker =  async_sessionmaker(
-            autoflush=False,
-            autocommit=False,
-            bind=self._engine
+        self._session_maker: async_sessionmaker = async_sessionmaker(
+            autoflush=False, autocommit=False, bind=self._engine
         )
 
     @contextlib.asynccontextmanager
@@ -43,7 +42,7 @@ class DatabaseSessionManager:
             Exception: если вохникает ошибка во время работы с сессией.
         """
         if self._session_maker is None:
-            raise Exception ('Session is not initialized')
+            raise Exception("Session is not initialized")
         session = self._session_maker()
         try:
             yield session
@@ -74,8 +73,9 @@ class DatabaseSessionManager:
         """
         await self.session().__aexit__(exc_type, exc_value, traceback)
 
-        
+
 sessionmanager = DatabaseSessionManager(settings.PG_URL)
+
 
 async def get_connection_db():
     """

@@ -1,28 +1,30 @@
-import asyncio
 import pytest
-import pytest_asyncio
 from fastapi.testclient import TestClient
 from sqlalchemy.pool import StaticPool
-from sqlalchemy.ext.asyncio import create_async_engine,async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.ext.asyncio import async_sessionmaker
+import asyncio
+import pytest_asyncio
 
 from app.main import app
-from app.models.base_model import Users, BaseModel
 from app.db.get_session import get_connection_db
+from app.models.base_model import BaseModel, Users
 from app.services.base import service
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test.db"
 
 engine = create_async_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}, poolclass=StaticPool
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False},
+    poolclass=StaticPool
+
 )
+test_user = {
+    "username": "test", 
+    "email": "deadpool@example.com", 
+    "password": "123",
+    }
 
 TestingSessionLocal = async_sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
-
-test_user = {
-    "username": "deadpool", 
-    "email": "deadpool@example.com", 
-    "password": "12345678"
-    }
 
 @pytest.fixture(scope="module", autouse=True)
 def init_models_wrap():
@@ -33,12 +35,13 @@ def init_models_wrap():
         async with TestingSessionLocal() as session:
             hash_password = service.password.get_password_hash(test_user["password"])
             current_user = Users(username=test_user["username"], email=test_user["email"], password=hash_password,
-                                confirmed=True, role="admin")
+                                confirmed=True, role="ADMIN")
             session.add(current_user)
             await session.commit()
 
     asyncio.run(init_models())
-    
+
+
 @pytest.fixture(scope="module")
 def client():
     # Dependency override
@@ -48,8 +51,9 @@ def client():
         try:
             yield session
         except Exception as err:
-            print(err)
+            
             await session.rollback()
+            raise #повторно выбрасить исключение
         finally:
             await session.close()
 
@@ -62,3 +66,11 @@ def client():
 async def get_token():
     token = await service.jwt.create_access_token(data={"sub": test_user["email"]})
     return token
+
+
+@pytest.fixture
+def mock_password_service(monkeypatch):
+    # Замокировать метод get_password_hash
+    def mock_get_password_hash(password):
+        return "mocked_hashed_password"
+    monkeypatch.setattr("app.services.base.service.password.get_password_hash", mock_get_password_hash)
